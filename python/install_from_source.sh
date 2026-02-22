@@ -35,7 +35,7 @@ cleanup() {
   echo ""
   infotext "cleaning up before exit.." "  --> removing temporary swapfile (if present).." "  --> removing build directory.."
   if [[ -e $GLB_TEMP_DL_PATH ]]; then
-    rm -r $GLB_TEMP_DL_PATH
+    rm -r "$GLB_TEMP_DL_PATH"
   fi
   if [[ -e $swapfile ]]; then
     swapoff "$swapfile" > /dev/null 2>&1
@@ -133,14 +133,9 @@ create_swap() {
   chmod 600 "$swapfile"
   mkswap "$swapfile" > /dev/null || return 1
   swapon "$swapfile" > /dev/null || return 1
-#  trap '{
-#    infotext "cleaning up temporary swapfile ($swpfile) before exit..";
-#    swapoff "$swpfile" > /dev/null && rm "$swpfile";
-#  }' EXIT
 }
 
 remove_swap() {
-  #local swapfile=$(swapon --show | grep 'py_build_swap' | grep -o '^[^ ]*')
   swapoff "$swapfile" > /dev/null || return 1
   rm "$swapfile"
 }
@@ -245,15 +240,16 @@ if (( $GLB_FLAG_REDUCED_PERF )); then
   GLB_VAR_CORES=2
 fi
 if ! make -j${GLB_VAR_CORES} > "$GLB_PATH_BUILD_LOG" 2>&1; then
-  infotext "build failed" "full build log will be shown below:"
-  cat /var/log/py_build.log
+  infotext "'make' failed (exit code: $?)" "full build log will be shown below:"
+  cat "$GLB_PATH_BUILD_LOG"
   exit 1
-  #exit_with_error "make failed to complete, exit code: $?"
 fi
 
 infotext "build complete" "installing.."
 if ! make altinstall > "$GLB_PATH_BUILD_LOG" 2>&1; then
-  exit_with_error "make altinstall failed to complete, exit code: $?"
+  infotext "'make altinstall' failed (exit code: $?)" "full build log will be shown below:"
+  cat "$GLB_PATH_BUILD_LOG"
+  exit 1
 fi
 
 infotext "install complete" "Python binary is now available in '$GLB_INSTALL_PATH'"
