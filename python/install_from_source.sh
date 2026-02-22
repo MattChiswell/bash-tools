@@ -31,6 +31,18 @@ infotext() {
   printf "[INFO]  %s\n" "$@"
 }
 
+cleanup() {
+  echo ""
+  infotext "cleaning up before exit.." "  --> removing temporary swapfile (if present).." "  --> removing build directory.."
+  if [[ -e $GLB_TEMP_DL_PATH ]]; then
+    rm -r $GLB_TEMP_DL_PATH
+  fi
+  if [[ -e $swapfile ]]; then
+    swapoff "$swapfile" > /dev/null 2>&1
+    rm -f "$swapfile"
+  fi
+}
+
 download_file() {
   local url="$1"
   local dest="$2"
@@ -52,10 +64,95 @@ download_file() {
   fi
 }
 
+install_build_dependencies() {
+  apt-get update -qq || return 1
+  apt-get install -y -qq build-essential libssl-dev zlib1g-dev libncurses5-dev \
+    libncursesw5-dev libreadline-dev libsqlite3-dev \
+    libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev \
+    liblzma-dev tk-dev libffi-dev xz-utils > /dev/null || return 1
+}
+
+check_disk_space() {
+  # all sizes are KB
+  local path="$1"
+  local req_space_kb="$2"
+  local req_space_buff=${3:-0}
+  local req_space=$(( $req_space_kb + $req_space_buff ))
+  local available_kb
+  available_kb=$(df -Pk "$path" | awk 'NR==2 {print $4}')
+  if [[ $available_kb -lt $req_space ]]; then
+    return 1
+  fi
+  return 0
+}
+
+check_build_memory() {
+  # all sizes are KB
+  local total_ram=$(cat /proc/meminfo | grep 'MemTotal' | grep -o '[0-9]\+')
+  local total_swp=$(cat /proc/meminfo | grep 'SwapTotal' | grep -o '[0-9]\+')
+  local total_mem=$(( $total_ram + $total_swp ))
+  if [[ $total_mem -lt 1048576 ]]; then
+    # 6G swap
+    GLB_FLAG_REDUCED_PERF=1
+    if ! create_swap 6291456; then
+      return 1
+    fi
+  elif [[ $total_mem -gt 1048576 && $total_mem -lt 2097152 ]]; then
+    # 4G swap
+    GLB_FLAG_REDUCED_PERF=1
+    if ! create_swap 4194304; then
+      return 1
+    fi
+  elif [[ $total_mem -gt 2097152 && $total_mem -lt 4194304 ]]; then
+    # 2G swap
+    if ! create_swap 2097152; then
+      return 1
+    fi
+  elif [[ $total_mem -gt 4194304 ]]; then
+    # 1G swap
+    if ! create_swap 1048576; then
+      return 1
+    fi
+  else
+    # failure somewhere
+    return 1
+  fi
+  # success
+  return 0
+}
+
+create_swap() {
+  # all sizes are KB
+  local swapsize="$1"
+  local swapdir=/var
+  swapfile="${swapdir}/py_build_swap"
+  if ! check_disk_space "$swapdir" "$swapsize" 512000; then
+    exit_with_error "insufficient free space in '$swapdir' for temporary swapfile, cannot continue"
+  fi
+  fallocate -l "${swapsize}K" "$swapfile" > /dev/null || return 1
+  chmod 600 "$swapfile"
+  mkswap "$swapfile" > /dev/null || return 1
+  swapon "$swapfile" > /dev/null || return 1
+#  trap '{
+#    infotext "cleaning up temporary swapfile ($swpfile) before exit..";
+#    swapoff "$swpfile" > /dev/null && rm "$swpfile";
+#  }' EXIT
+}
+
+remove_swap() {
+  #local swapfile=$(swapon --show | grep 'py_build_swap' | grep -o '^[^ ]*')
+  swapoff "$swapfile" > /dev/null || return 1
+  rm "$swapfile"
+}
+
 # ----- GLOBALS --------------------------------------
 
 # Flags
 GLB_FLAG_MKDIR=0
+GLB_FLAG_REDUCED_PERF=0
+
+# Vars
+GLB_VAR_CORES=$(nproc)
 
 # Paths
 GLB_INSTALL_PATH=""
@@ -63,6 +160,7 @@ GLB_TEMP_DL_FILE=""
 GLB_TEMP_DL_PATH=""
 GLB_TEMP_TARBALL=""
 GLB_PYTHON_SRC_URL=""
+GLB_PATH_BUILD_LOG=/var/log/py_build.log
 
 # Regex
 GLB_REGEX_PY_BIN="^python3\.[0-9]+(\.[0-9]+)?$"
@@ -101,24 +199,63 @@ GLB_TEMP_DL_PATH=$(mktemp -d) || exit_with_error "mktemp failed to create tempdi
 GLB_TEMP_DL_FILE=$(mktemp -u python.XXXXXX) || exit_with_error "mktemp failed to create tempfile"
 GLB_TEMP_TARBALL="${GLB_TEMP_DL_PATH}/${GLB_TEMP_DL_FILE}"
 
-trap "rm -rf '$GLB_TEMP_DL_PATH'" EXIT
+trap cleanup EXIT
+
+#trap "rm -rf '$GLB_TEMP_DL_PATH'" EXIT
 if ! download_file $GLB_PYTHON_SRC_URL $GLB_TEMP_TARBALL; then
   exit_with_error "download failed, please check the URL and try again"
 fi
 
 infotext "download complete" "extracting tarball.."
-
-#mkdir -p "${GLB_TEMP_DL_PATH}/extract"
-#tar -xzf "$GLB_TEMP_TARBALL" --strip-components=1 -C "${GLB_TEMP_DL_PATH}/extract"
 tar -xzf "$GLB_TEMP_TARBALL" -C "$GLB_TEMP_DL_PATH"
-extracted=$(ls "$GLB_TEMP_DL_PATH" | grep -oE "$GLB_REGEX_PY_TARBALL" | sed "s/Python-//")
+folder=$(ls "$GLB_TEMP_DL_PATH" | grep -oE "$GLB_REGEX_PY_TARBALL")
+py_full_version=$(sed "s/Python-//" <<< "$folder")
 detected=$(ls "$GLB_INSTALL_PATH" | grep -oE "$GLB_REGEX_PY_BIN" | sed "s/python//")
 
 infotext "extraction complete" "checking for conflicting versions in '$GLB_INSTALL_PATH'.."
-
-if match=$(grep -Fx "${extracted%.*}" <<< "$detected"); then
-  infotext "version conflict detected" "python${match} was detected in '$GLB_INSTALL_PATH'" "you are trying to install python${extracted}"
+if match=$(grep -Fx "${py_full_version%.*}" <<< "$detected"); then
+  infotext "version conflict detected" "python${match} was detected in '$GLB_INSTALL_PATH'" "you are trying to install python${py_full_version}"
   exit_with_error "cannot install matching major version in this directory" "remove existing version or change install path and try again"
 fi
 
+infotext "checking/installing build dependencies using apt.."
+if ! install_build_dependencies; then
+  exit_with_error "apt-get failed to install build dependencies"
+fi
+infotext "dependencies installed"
+
+infotext "checking system memory setup" "a temporary swapfile may be created during this process, it will be removed automatically"
+if ! check_build_memory; then
+  infotext "a temporary swapfile was required due to the limited system memory available"
+  exit_with_error "swapfile allocation failed" "cannot continue with current memory setup"
+fi
+
+infotext "moving into source directory.." "  --> ${GLB_TEMP_DL_PATH}/${folder}"
+cd "${GLB_TEMP_DL_PATH}/${folder}"
+
 infotext "configuring.." "  --enable-optimizations" "  --with-ensurepip=install" "  --prefix=$GLB_INSTALL_PATH"
+install_prefix="${GLB_INSTALL_PATH}/python${py_full_version%.*}"
+if ! ./configure --enable-optimizations --with-ensurepip=install --prefix=$install_prefix > /dev/null; then
+  exit_with_error "./configure failed to complete, exit code: $?"
+fi
+
+infotext "configure complete" "note that building may take +1hr on limited hardware"
+infotext "all build output is redirected into '$GLB_PATH_BUILD_LOG'" "building.."
+if (( $GLB_FLAG_REDUCED_PERF )); then
+  GLB_VAR_CORES=2
+fi
+if ! make -j${GLB_VAR_CORES} > "$GLB_PATH_BUILD_LOG" 2>&1; then
+  infotext "build failed" "full build log will be shown below:"
+  cat /var/log/py_build.log
+  exit 1
+  #exit_with_error "make failed to complete, exit code: $?"
+fi
+
+infotext "build complete" "installing.."
+if ! make altinstall > "$GLB_PATH_BUILD_LOG" 2>&1; then
+  exit_with_error "make altinstall failed to complete, exit code: $?"
+fi
+
+infotext "install complete" "Python binary is now available in '$GLB_INSTALL_PATH'"
+infotext "this version has NOT been added to your path"
+exit 0
