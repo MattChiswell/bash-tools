@@ -92,23 +92,18 @@ check_build_memory() {
   local total_swp=$(cat /proc/meminfo | grep 'SwapTotal' | grep -o '[0-9]\+')
   local total_mem=$(( $total_ram + $total_swp ))
   if [[ $total_mem -lt 1048576 ]]; then
-    # 6G swap
+    # 3G swap
     GLB_FLAG_REDUCED_PERF=1
-    if ! create_swap 6291456; then
+    if ! create_swap 3145728; then
       return 1
     fi
   elif [[ $total_mem -gt 1048576 && $total_mem -lt 2097152 ]]; then
-    # 4G swap
-    GLB_FLAG_REDUCED_PERF=1
-    if ! create_swap 4194304; then
-      return 1
-    fi
-  elif [[ $total_mem -gt 2097152 && $total_mem -lt 4194304 ]]; then
     # 2G swap
+    GLB_FLAG_REDUCED_PERF=1
     if ! create_swap 2097152; then
       return 1
     fi
-  elif [[ $total_mem -gt 4194304 ]]; then
+  elif [[ $total_mem -gt 2097152 && $total_mem -lt 4194304 ]]; then
     # 1G swap
     if ! create_swap 1048576; then
       return 1
