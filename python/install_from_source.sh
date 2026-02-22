@@ -108,6 +108,9 @@ check_build_memory() {
     if ! create_swap 1048576; then
       return 1
     fi
+  elif [[ $total_mem -gt 4194304 ]]; then
+    # no extra swap needed
+    return 0
   else
     # failure somewhere
     return 1
