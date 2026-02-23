@@ -109,8 +109,7 @@ check_disk_space() {
   local req_space_kb="$2"
   local req_space_buff=${3:-0}
   local req_space=$(( $req_space_kb + $req_space_buff ))
-  local available_kb
-  available_kb=$(df -Pk "$path" | awk 'NR==2 {print $4}')
+  local available_kb=$(df -Pk "$path" | awk 'NR==2 {print $4}')
   if [[ $available_kb -lt $req_space ]]; then
     return 1
   fi
@@ -154,19 +153,33 @@ create_swap() {
   # all sizes are KB
   local swapsize="$1"
   local swapdir=/var
-  swapfile="${swapdir}/py_build_swap"
+  GLB_PATH_SWAPFILE="${swapdir}/py_build_swap"
   if ! check_disk_space "$swapdir" "$swapsize" 512000; then
     exit_with_error "insufficient free space in '$swapdir' for temporary swapfile, cannot continue"
   fi
-  fallocate -l "${swapsize}K" "$swapfile" > /dev/null || return 1
-  chmod 600 "$swapfile"
-  mkswap "$swapfile" > /dev/null || return 1
-  swapon "$swapfile" > /dev/null || return 1
+  fallocate -l "${swapsize}K" "$GLB_PATH_SWAPFILE" > /dev/null || return 1
+  chmod 600 "$GLB_PATH_SWAPFILE"
+  mkswap "$GLB_PATH_SWAPFILE" > /dev/null || return 1
+  swapon "$GLB_PATH_SWAPFILE" > /dev/null || return 1
 }
 
 remove_swap() {
-  swapoff "$swapfile" > /dev/null || return 1
-  rm "$swapfile"
+  swapoff "$GLB_PATH_SWAPFILE" > /dev/null || return 1
+  rm -f "$GLB_PATH_SWAPFILE"
+}
+
+cleanup() {
+  echo ""
+  infotext "cleaning up before exit.." "  --> removing temporary swapfile (if present).." "  --> removing build directory.."
+  if [[ -e $GLB_PATH_TMP_DIR ]]; then
+    rm -r "$GLB_PATH_TMP_DIR"
+    infotext "  --> removed '$GLB_PATH_TMP_DIR'"
+  fi
+  if [[ -e $GLB_PATH_SWAPFILE ]]; then
+    swapoff "$GLB_PATH_SWAPFILE" > /dev/null 2>&1
+    rm -f "$GLB_PATH_SWAPFILE"
+    infotext "  --> disabled temporary swapfile and removed '$GLB_PATH_SWAPFILE'"
+  fi
 }
 
 # ----- GLOBALS --------------------------------------
