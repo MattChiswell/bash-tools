@@ -230,14 +230,13 @@ if ! [[ -d $GLB_PATH_INSTALL_TARGET ]] && ! (( $GLB_FLAG_MKDIR )); then
   exit_with_error "directory '$GLB_PATH_INSTALL_TARGET' does not exist, -f not set so will not create"
 fi
 
-infotext "this script will attempt to install Python from source"
-infotext "download url: $GLB_PYTHON_SRC_URL"
-infotext "install path: $GLB_INSTALL_PATH"
-infotext "downloading archive, please wait.."
+# ----- SETUP ----------------------------------------
 
-GLB_TEMP_DL_PATH=$(mktemp -d) || exit_with_error "mktemp failed to create tempdir"
-GLB_TEMP_DL_FILE=$(mktemp -u python.XXXXXX) || exit_with_error "mktemp failed to create tempfile"
-GLB_TEMP_TARBALL="${GLB_TEMP_DL_PATH}/${GLB_TEMP_DL_FILE}"
+GLB_VAR_CORES=$(nproc)
+GLB_PATH_TMP_DIR=$(mktemp -d) || exit_with_error "'mktemp' failed to create temporary directory in /tmp"
+GLB_PATH_TMP_FILE=$(mktemp -u python.XXXXXX) || exit_with_error "'mktemp' failed to generate temporary filename"
+GLB_PATH_BUILD_LOG=/var/log/py_build.log
+GLB_PATH_TARBALL="${GLB_PATH_TMP_DIR}/${GLB_PATH_TMP_FILE}"
 
 trap cleanup EXIT
 
