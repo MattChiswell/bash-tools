@@ -23,6 +23,7 @@ usage() {
   echo "  options:"
   echo "    -d    install directory / prefix"
   echo "    -u    python source file url (expects .tgz archive)"
+  echo "    -v    python version number to download and install [not yet implemented]"
   echo "    -f    if install path does not exist, create it"
   echo "    -h    display this help text"
   echo ""
@@ -204,10 +205,11 @@ GLB_PATH_INSTALL_TARGET=""
 
 # ----- ARGUMENTS ------------------------------------
 
-while getopts d:u:fh flag; do
+while getopts d:u:v:fh flag; do
   case "$flag" in
-    d) GLB_INSTALL_PATH="$OPTARG" ;;
-    u) GLB_PYTHON_SRC_URL="$OPTARG" ;;
+    d) GLB_PATH_INSTALL_TARGET="$OPTARG" ;;
+    u) GLB_VAR_PY_SRC_URL="$OPTARG" ;;
+    v) GLB_VAR_PY_VERSION="$OPTARG" && exit_with_error "option not yet implemented" ;;
     f) GLB_FLAG_MKDIR=1 ;;
     h) usage ;;
     *) usage ;;
