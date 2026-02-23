@@ -39,16 +39,39 @@ infotext() {
   printf "[INFO]  %s\n" "$@"
 }
 
-cleanup() {
-  echo ""
-  infotext "cleaning up before exit.." "  --> removing temporary swapfile (if present).." "  --> removing build directory.."
-  if [[ -e $GLB_TEMP_DL_PATH ]]; then
-    rm -r "$GLB_TEMP_DL_PATH"
+scan_directory() {
+  local dir="$1"
+  local entry name
+  for entry in "$dir"/*; do
+    [[ -e $entry ]] || continue
+    name=${entry##*/}
+    parse_version_string "$name"
+  done
+}
+
+parse_version_string() {
+  local version_str=${1,,}  # make lowercase
+  if [[ $version_str =~ ^python-?([0-9])\.([0-9]{1,2})(\.([0-9]{1,2}))?$ ]]; then
+    printf '%s %s %s\n' \
+      "${BASH_REMATCH[1]}" \
+      "${BASH_REMATCH[2]}" \
+      "${BASH_REMATCH[4]:-0}"
+    return 0
   fi
-  if [[ -e $swapfile ]]; then
-    swapoff "$swapfile" > /dev/null 2>&1
-    rm -f "$swapfile"
-  fi
+  return 1
+}
+
+detect_version_conflicts() {
+  local dir="$1"
+  local conflict_ver="${2%.*}"
+  local maj min pat
+  while read -r maj min pat; do
+    if [[ "${maj}.${min}" == $conflict_ver ]]; then
+      infotext "conflicting version (python${maj}.${min}.${pat}) detected in '$dir'"
+      infotext "installing python${conflict_ver} in the same directory is not possible"
+      return 1
+    fi
+  done < <(scan_directory "$dir")
 }
 
 download_file() {
