@@ -218,15 +218,17 @@ done
 
 # ----- VALIDATION -----------------------------------
 
-if [[ -z $GLB_INSTALL_PATH || -z $GLB_PYTHON_SRC_URL ]]; then
-  exit_with_error "missing argument(s)"
+if [[ -z $GLB_PATH_INSTALL_TARGET ]]; then
+  exit_with_error "missing argument: -d [PATH]"
 fi
 
-if ! [[ -d $GLB_INSTALL_PATH ]] && ! (( $GLB_FLAG_MKDIR )); then
-  exit_with_error "directory '$GLB_INSTALL_PATH' does not exist, -f not set so will not create"
+if [[ -z $GLB_VAR_PY_SRC_URL ]]; then
+  exit_with_error "missing argument: -u [URL]"
 fi
 
-# ----- RUN ------------------------------------------
+if ! [[ -d $GLB_PATH_INSTALL_TARGET ]] && ! (( $GLB_FLAG_MKDIR )); then
+  exit_with_error "directory '$GLB_PATH_INSTALL_TARGET' does not exist, -f not set so will not create"
+fi
 
 infotext "this script will attempt to install Python from source"
 infotext "download url: $GLB_PYTHON_SRC_URL"
