@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# ----- NOTES ----------------------------------------
+# + variables prefixed with GLB_ are considered global
+# + some GLB_ variables are mutated inside functions
+#  - random mutation was avoided except for:
+#   - GLB_PATH_SWAPFILE
+#   - GLB_FLAG_REDUCED_PERF
+# ----------------------------------------------------
+
 # ----- ROOT -----------------------------------------
 
 if [[ $EUID -ne 0 ]]; then
