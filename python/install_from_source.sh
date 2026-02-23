@@ -273,11 +273,17 @@ if ! existing=$(detect_version_conflicts "$GLB_PATH_INSTALL_TARGET" "$GLB_VAR_PY
   exit_with_error "unable to continue, change install path or remove existing version"
 fi
 
-infotext "checking/installing build dependencies using apt.."
+GLB_PATH_BUILD_DIR=("$GLB_PATH_TMP_DIR"/*/)
+
+# ----- INSTALL BUILD TOOLS -----------
+
+infotext "no conflicts detected" "checking/installing build dependencies using apt.."
 if ! install_build_dependencies; then
   exit_with_error "apt-get failed to install build dependencies"
 fi
 infotext "dependencies installed"
+
+# ----- SYSTEM MEMORY/SWAP ------------
 
 infotext "checking system memory setup" "a temporary swapfile may be created during this process, it will be removed automatically"
 if ! check_build_memory; then
@@ -285,13 +291,18 @@ if ! check_build_memory; then
   exit_with_error "swapfile allocation failed" "cannot continue with current memory setup"
 fi
 
-infotext "moving into source directory.." "  --> ${GLB_TEMP_DL_PATH}/${folder}"
-cd "${GLB_TEMP_DL_PATH}/${folder}"
+# ----- CONFIGURE/BUILD ---------------
 
-infotext "configuring.." "  --enable-optimizations" "  --with-ensurepip=install" "  --prefix=$GLB_INSTALL_PATH"
-install_prefix="${GLB_INSTALL_PATH}/python${py_full_version%.*}"
-if ! ./configure --enable-optimizations --with-ensurepip=install --prefix=$install_prefix > /dev/null; then
-  exit_with_error "./configure failed to complete, exit code: $?"
+infotext "moving into build directory.." "  --> $GLB_PATH_BUILD_DIR"
+cd "$GLB_PATH_BUILD_DIR"
+
+# make install_prefix a global ?
+install_prefix="${GLB_PATH_INSTALL_TARGET}/python${GLB_VAR_PY_VERSION%.*}"
+infotext "configuring.." "  --enable-optimizations" "  --with-ensurepip=install" "  --prefix=$install_prefix"
+if ! ./configure --enable-optimizations --with-ensurepip=install --prefix="$install_prefix" > "$GLB_PATH_BUILD_LOG" 2>&1; then
+  infotext "'./configure' failed (exit code: $?)" "full build log will be shown below:"
+  cat "$GLB_PATH_BUILD_LOG"
+  exit 1
 fi
 
 infotext "configure complete" "note that building may take +1hr on limited hardware"
@@ -299,11 +310,14 @@ infotext "all build output is redirected into '$GLB_PATH_BUILD_LOG'" "building..
 if (( $GLB_FLAG_REDUCED_PERF )); then
   GLB_VAR_CORES=2
 fi
+
 if ! make -j${GLB_VAR_CORES} > "$GLB_PATH_BUILD_LOG" 2>&1; then
   infotext "'make' failed (exit code: $?)" "full build log will be shown below:"
   cat "$GLB_PATH_BUILD_LOG"
   exit 1
 fi
+
+# ----- INSTALL -----------------------
 
 infotext "build complete" "installing.."
 if ! make altinstall > "$GLB_PATH_BUILD_LOG" 2>&1; then
@@ -312,6 +326,10 @@ if ! make altinstall > "$GLB_PATH_BUILD_LOG" 2>&1; then
   exit 1
 fi
 
-infotext "install complete" "Python binary is now available in '$GLB_INSTALL_PATH'"
+ln -s "${install_prefix}/bin/python${GLB_VAR_PY_VERSION%.*}" "${install_prefix}/bin/python3"
+
+# ----- EXIT --------------------------
+
+infotext "install complete" "Python binary is now available in '$GLB_PATH_INSTALL_TARGET'"
 infotext "this version has NOT been added to your path"
 exit 0
