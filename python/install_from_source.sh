@@ -240,21 +240,37 @@ GLB_PATH_TARBALL="${GLB_PATH_TMP_DIR}/${GLB_PATH_TMP_FILE}"
 
 trap cleanup EXIT
 
-#trap "rm -rf '$GLB_TEMP_DL_PATH'" EXIT
-if ! download_file $GLB_PYTHON_SRC_URL $GLB_TEMP_TARBALL; then
+# ----- RUN ------------------------------------------
+
+# ----- DOWNLOAD/EXTRACT --------------
+
+infotext "this script will attempt to install Python from source"
+infotext "download url: $GLB_VAR_PY_SRC_URL"
+infotext "install path: $GLB_PATH_INSTALL_TARGET"
+infotext "downloading archive, please wait.."
+
+if ! download_file "$GLB_VAR_PY_SRC_URL" "$GLB_PATH_TARBALL"; then
   exit_with_error "download failed, please check the URL and try again"
 fi
 
 infotext "download complete" "extracting tarball.."
-tar -xzf "$GLB_TEMP_TARBALL" -C "$GLB_TEMP_DL_PATH"
-folder=$(ls "$GLB_TEMP_DL_PATH" | grep -oE "$GLB_REGEX_PY_TARBALL")
-py_full_version=$(sed "s/Python-//" <<< "$folder")
-detected=$(ls "$GLB_INSTALL_PATH" | grep -oE "$GLB_REGEX_PY_BIN" | sed "s/python//")
+tar -xzf "$GLB_PATH_TARBALL" -C "$GLB_PATH_TMP_DIR"
+infotext "extraction complete" "checking for conflicting versions in '$GLB_PATH_INSTALL_TARGET'.."
 
-infotext "extraction complete" "checking for conflicting versions in '$GLB_INSTALL_PATH'.."
-if match=$(grep -Fx "${py_full_version%.*}" <<< "$detected"); then
-  infotext "version conflict detected" "python${match} was detected in '$GLB_INSTALL_PATH'" "you are trying to install python${py_full_version}"
-  exit_with_error "cannot install matching major version in this directory" "remove existing version or change install path and try again"
+# ----- VERSION CONFLICTS -------------
+
+if [[ -z $GLB_VAR_PY_VERSION ]]; then
+  version_str=("$GLB_PATH_TMP_DIR"/*/)
+  version_str=${version_str[0]%/}
+  version_str=${version_str##*/}
+  if ! GLB_VAR_PY_VERSION=$(parse_version_string "$version_str" | sed 's/ /./g'); then
+    exit_with_error "unable to determine version number from downloaded Python tarball"
+  fi
+fi
+
+if ! existing=$(detect_version_conflicts "$GLB_PATH_INSTALL_TARGET" "$GLB_VAR_PY_VERSION"); then
+  echo "$existing"
+  exit_with_error "unable to continue, change install path or remove existing version"
 fi
 
 infotext "checking/installing build dependencies using apt.."
