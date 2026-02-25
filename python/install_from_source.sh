@@ -381,12 +381,12 @@ fi
 infotext "moving into build directory.." "  --> $GLB_PATH_BUILD_DIR"
 cd "$GLB_PATH_BUILD_DIR"
 
-# make install_prefix a global ?
-install_prefix="${GLB_PATH_INSTALL_TARGET}/python${GLB_VAR_PY_VERSION%.*}"
-infotext "configuring.." "  --enable-optimizations" "  --with-ensurepip=install" "  --prefix=$install_prefix"
-if ! ./configure --enable-optimizations --with-ensurepip=install --prefix="$install_prefix" > "$GLB_PATH_BUILD_LOG" 2>&1; then
-  infotext "'./configure' failed (exit code: $?)" "full build log will be shown below:"
-  cat "$GLB_PATH_BUILD_LOG"
+infotext "configuring.." "  --enable-optimizations" "  --with-ensurepip=install" "  --prefix=$GLB_PATH_INSTALL_PREFIX"
+if ! ./configure --enable-optimizations --with-ensurepip=install --prefix="$GLB_PATH_INSTALL_PREFIX" > "$GLB_PATH_BUILD_LOG" 2>&1; then
+  infotext "'./configure' failed (exit code: $?)"
+  if ask_confirmation "would you like to see the full build log now?"; then
+    (( GLB_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
+  fi
   exit 1
 fi
 
@@ -397,8 +397,10 @@ if (( $GLB_FLAG_REDUCED_PERF )); then
 fi
 
 if ! make -j${GLB_VAR_CORES} > "$GLB_PATH_BUILD_LOG" 2>&1; then
-  infotext "'make' failed (exit code: $?)" "full build log will be shown below:"
-  cat "$GLB_PATH_BUILD_LOG"
+  infotext "'make' failed (exit code: $?)"
+  if ask_confirmation "would you like to see the full build log now?"; then
+    (( GLB_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
+  fi
   exit 1
 fi
 
