@@ -358,6 +358,7 @@ if version_lt $GLB_VAR_PY_VERSION "3.7.0"; then
 fi
 
 GLB_PATH_BUILD_DIR=("$GLB_PATH_TMP_DIR"/*/)
+GLB_PATH_INSTALL_PREFIX="${GLB_PATH_INSTALL_TARGET}/python-${GLB_VAR_PY_VERSION%.*}"
 
 # ----- INSTALL BUILD TOOLS -----------
 
@@ -405,15 +406,19 @@ fi
 
 infotext "build complete" "installing.."
 if ! make altinstall > "$GLB_PATH_BUILD_LOG" 2>&1; then
-  infotext "'make altinstall' failed (exit code: $?)" "full build log will be shown below:"
-  cat "$GLB_PATH_BUILD_LOG"
+  infotext "'make altinstall' failed (exit code: $?)"
+  if ask_confirmation "would you like to see the full build log now?"; then
+    (( GLB_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
+  fi
   exit 1
 fi
 
-ln -s "${install_prefix}/bin/python${GLB_VAR_PY_VERSION%.*}" "${install_prefix}/bin/python3"
+# dont do this?
+#ln -s "${GLB_PATH_INSTALL_PREFIX}" "${GLB_PATH_INSTALL_PREFIX}/bin/python3"
 
 # ----- EXIT --------------------------
 
-infotext "install complete" "Python binary is now available in '$GLB_PATH_INSTALL_TARGET'"
+infotext "install complete"
+infotext "  --> installed to: $GLB_PATH_INSTALL_PREFIX" " --> binary: ${GLB_PATH_INSTALL_PREFIX}/bin/python${GLB_VAR_PY_VERSION%.*}"
 infotext "this version has NOT been added to your path"
 exit 0
