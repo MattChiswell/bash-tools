@@ -13,13 +13,6 @@
 #   attempting to install legacy versions (<= 3.4)
 # ----------------------------------------------------
 
-# ----- ROOT -----------------------------------------
-
-if [[ $EUID -ne 0 ]]; then
-  echo -e "\nmust be run as root, retrying with sudo\n"
-  exec sudo "$0" "$@"
-fi
-
 # ----- HELPERS --------------------------------------
 
 usage() {
