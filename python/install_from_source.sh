@@ -297,6 +297,7 @@ GLB_PATH_TMP_DIR=$(mktemp -d) || exit_with_error "'mktemp' failed to create temp
 GLB_PATH_TMP_FILE=$(mktemp -u python.XXXXXX) || exit_with_error "'mktemp' failed to generate temporary filename"
 GLB_PATH_BUILD_LOG=/var/log/py_build.log
 GLB_PATH_TARBALL="${GLB_PATH_TMP_DIR}/${GLB_PATH_TMP_FILE}"
+GLB_URL_PY_SRC_BASE="https://www.python.org/ftp/python/<PY_VER>/Python-<PY_VER>.tgz"
 
 trap cleanup EXIT
 
@@ -304,12 +305,16 @@ trap cleanup EXIT
 
 # ----- DOWNLOAD/EXTRACT --------------
 
+if [[ -z $GLB_URL_PY_SRC && -n $GLB_VAR_PY_VERSION ]]; then
+  GLB_URL_PY_SRC=$(sed "s/<PY_VER>/${GLB_VAR_PY_VERSION}/g" <<< $GLB_URL_PY_SRC_BASE)
+fi
+
 infotext "this script will attempt to install Python from source"
-infotext "download url: $GLB_VAR_PY_SRC_URL"
+infotext "download url: $GLB_URL_PY_SRC"
 infotext "install path: $GLB_PATH_INSTALL_TARGET"
 infotext "downloading archive, please wait.."
 
-if ! download_file "$GLB_VAR_PY_SRC_URL" "$GLB_PATH_TARBALL"; then
+if ! download_file "$GLB_URL_PY_SRC" "$GLB_PATH_TARBALL"; then
   exit_with_error "download failed, please check the URL and try again"
 fi
 
