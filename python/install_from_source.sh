@@ -362,7 +362,7 @@ GLB_PATH_INSTALL_PREFIX="${GLB_PATH_INSTALL_TARGET}/python-${GLB_VAR_PY_VERSION%
 
 # ----- INSTALL BUILD TOOLS -----------
 
-infotext "no conflicts detected" "checking/installing build dependencies using apt.."
+infotext "checking/installing build dependencies using apt.."
 if ! install_build_dependencies; then
   exit_with_error "apt-get failed to install build dependencies"
 fi
