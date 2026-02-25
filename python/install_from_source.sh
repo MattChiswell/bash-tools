@@ -49,7 +49,31 @@ exit_with_error() {
 }
 
 infotext() {
-  printf "[INFO]  %s\n" "$@"
+  if ! (( GLB_FLAG_QUIET )); then
+    printf "[INFO]  %s\n" "$@"
+  fi
+}
+
+ask_confirmation() {
+  if (( GLB_FLAG_QUIET )); then
+    # assume yes
+    return 0
+  fi
+  local prompt="$1"
+  while true; do
+    read -p "[INPUT] --> $prompt (y/n): " choice
+    case "$choice" in
+      [Yy]*)
+        return 0
+        ;;
+      [Nn]*)
+        return 1
+        ;;
+      *)
+        echo "Invalid input. Please answer with 'y' or 'n'" >&2
+        ;;
+    esac
+  done
 }
 
 scan_directory() {
@@ -60,6 +84,10 @@ scan_directory() {
     name=${entry##*/}
     parse_version_string "$name"
   done
+}
+
+version_lt() {
+    [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" != "$2" ]
 }
 
 parse_version_string() {
