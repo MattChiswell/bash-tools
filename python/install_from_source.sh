@@ -278,8 +278,12 @@ if [[ -z $GLB_PATH_INSTALL_TARGET ]]; then
   exit_with_error "missing argument: -d [PATH]"
 fi
 
-if [[ -z $GLB_VAR_PY_SRC_URL ]]; then
-  exit_with_error "missing argument: -u [URL]"
+if [[ -z $GLB_URL_PY_SRC && -z $GLB_VAR_PY_VERSION ]]; then
+  exit_with_error "missing argument: specify one of -u [URL] or -v [VERSION]"
+fi
+
+if [[ -n $GLB_URL_PY_SRC && -n $GLB_VAR_PY_VERSION ]]; then
+  exit_with_error "too many arguments: specify one of -u [URL] OR -v [VERSION], not both"
 fi
 
 if ! [[ -d $GLB_PATH_INSTALL_TARGET ]] && ! (( $GLB_FLAG_MKDIR )); then
