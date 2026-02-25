@@ -211,10 +211,14 @@ remove_swap() {
 
 cleanup() {
   echo ""
-  infotext "cleaning up before exit.." "  --> removing temporary swapfile (if present).." "  --> removing build directory.."
+  infotext "cleaning up before exit.."
   if [[ -e $GLB_PATH_TMP_DIR ]]; then
     rm -r "$GLB_PATH_TMP_DIR"
     infotext "  --> removed '$GLB_PATH_TMP_DIR'"
+  fi
+  if [[ -e $GLB_PATH_INSTALL_TARGET ]] && (( $GLB_FLAG_DIR_CREATED )); then
+    rm -r "$GLB_PATH_INSTALL_TARGET"
+    infotext "  --> removed '$GLB_PATH_INSTALL_TARGET'"
   fi
   if [[ -e $GLB_PATH_SWAPFILE ]]; then
     swapoff "$GLB_PATH_SWAPFILE" > /dev/null 2>&1
