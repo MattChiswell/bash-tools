@@ -230,13 +230,18 @@ cleanup() {
 # ----- GLOBALS --------------------------------------
 
 # Flags
+GLB_FLAG_QUIET=0
 GLB_FLAG_MKDIR=0
+GLB_FLAG_DIR_CREATED=0
 GLB_FLAG_REDUCED_PERF=0
 
 # Vars
 GLB_VAR_CORES=0
-GLB_VAR_PY_SRC_URL=""
 GLB_VAR_PY_VERSION=""
+
+# URLs
+GLB_URL_PY_SRC=""
+GLB_URL_PY_SRC_BASE=""
 
 # Paths
 GLB_PATH_TARBALL=""
@@ -246,15 +251,17 @@ GLB_PATH_SWAPFILE=""
 GLB_PATH_BUILD_DIR=""
 GLB_PATH_BUILD_LOG=""
 GLB_PATH_INSTALL_TARGET=""
+GLB_PATH_INSTALL_PREFIX=""
 
 # ----- ARGUMENTS ------------------------------------
 
-while getopts d:u:v:fh flag; do
+while getopts d:u:v:fqh flag; do
   case "$flag" in
     d) GLB_PATH_INSTALL_TARGET="$OPTARG" ;;
-    u) GLB_VAR_PY_SRC_URL="$OPTARG" ;;
-    v) GLB_VAR_PY_VERSION="$OPTARG" && exit_with_error "option not yet implemented" ;;
+    u) GLB_URL_PY_SRC="$OPTARG" ;;
+    v) GLB_VAR_PY_VERSION="$OPTARG" ;;
     f) GLB_FLAG_MKDIR=1 ;;
+    q) GLB_FLAG_QUIET=1 ;;
     h) usage ;;
     *) usage ;;
   esac
