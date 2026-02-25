@@ -303,6 +303,14 @@ trap cleanup EXIT
 
 # ----- RUN ------------------------------------------
 
+# ----- INSTALL DIRECTORY -------------
+
+if ! [[ -d $GLB_PATH_INSTALL_TARGET ]] && (( $GLB_FLAG_MKDIR )); then
+  infotext "$GLB_PATH_INSTALL_TARGET does not exist, it will be created"
+  mkdir -p "$GLB_PATH_INSTALL_TARGET"
+  GLB_FLAG_DIR_CREATED=1
+fi
+
 # ----- DOWNLOAD/EXTRACT --------------
 
 if [[ -z $GLB_URL_PY_SRC && -n $GLB_VAR_PY_VERSION ]]; then
