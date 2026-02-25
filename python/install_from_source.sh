@@ -3,9 +3,14 @@
 # ----- NOTES ----------------------------------------
 # + variables prefixed with GLB_ are considered global
 # + some GLB_ variables are mutated inside functions
-#  - random mutation was avoided except for:
+#  - mutation was avoided except for:
 #   - GLB_PATH_SWAPFILE
 #   - GLB_FLAG_REDUCED_PERF
+#   - GLB_FLAG_QUIET
+# + very early versions will fail to configure/build
+#   due to changes in expected build environment, you
+#   will need to prepare your system manually before
+#   attempting to install legacy versions (<= 3.4)
 # ----------------------------------------------------
 
 # ----- ROOT -----------------------------------------
