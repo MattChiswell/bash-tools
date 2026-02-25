@@ -345,6 +345,17 @@ if ! existing=$(detect_version_conflicts "$GLB_PATH_INSTALL_TARGET" "$GLB_VAR_PY
   echo "$existing"
   exit_with_error "unable to continue, change install path or remove existing version"
 fi
+infotext "no conflicts detected"
+
+if version_lt $GLB_VAR_PY_VERSION "3.7.0"; then
+  infotext "note: legacy versions are likely to fail during configuration/build"
+  infotext "note: legacy versions will expect exec paths and environment setups that are no longer standard in linux"
+  infotext "note: building is not impossible but will require manual setup before trying to build"
+  if ! ask_confirmation "do you want to continue and try to build?"; then
+    infotext "cancelled"
+    exit 0
+  fi
+fi
 
 GLB_PATH_BUILD_DIR=("$GLB_PATH_TMP_DIR"/*/)
 
