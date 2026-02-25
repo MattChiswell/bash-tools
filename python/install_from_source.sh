@@ -137,7 +137,7 @@ download_file() {
 }
 
 install_build_dependencies() {
-  apt-get update -qq || return 1
+  apt-get update -qq > /dev/null || return 1
   apt-get install -y -qq build-essential libssl-dev zlib1g-dev libncurses5-dev \
     libncursesw5-dev libreadline-dev libsqlite3-dev \
     libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev \
