@@ -269,6 +269,11 @@ done
 
 # ----- VALIDATION -----------------------------------
 
+if [[ $EUID -ne 0 ]]; then
+  (( GLB_FLAG_QUIET )) || echo -e "\nmust be run as root, retrying with sudo\n"
+  exec sudo "$0" "$@"
+fi
+
 if [[ -z $GLB_PATH_INSTALL_TARGET ]]; then
   exit_with_error "missing argument: -d [PATH]"
 fi
