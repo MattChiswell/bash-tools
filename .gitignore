@@ -26,4 +26,4 @@ debug/
 # ---- OS / Editor Junk ---- #
 .DS_Store
 .vscode
-.swp
+*.swp
