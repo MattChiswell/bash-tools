@@ -52,13 +52,13 @@ exit_with_error() {
 }
 
 infotext() {
-  if ! (( GLB_FLAG_QUIET )); then
+  if ! (( $GLB_FLAG_QUIET )); then
     printf "[INFO]  %s\n" "$@"
   fi
 }
 
 ask_confirmation() {
-  if (( GLB_FLAG_QUIET )); then
+  if (( $GLB_FLAG_QUIET )); then
     # assume yes
     return 0
   fi
@@ -273,7 +273,7 @@ done
 # ----- VALIDATION -----------------------------------
 
 if [[ $EUID -ne 0 ]]; then
-  (( GLB_FLAG_QUIET )) || echo -e "\nmust be run as root, retrying with sudo\n"
+  (( $GLB_FLAG_QUIET )) || echo -e "\nmust be run as root, retrying with sudo\n"
   exec sudo "$0" "$@"
 fi
 
@@ -350,7 +350,7 @@ if ! existing=$(detect_version_conflicts "$GLB_PATH_INSTALL_TARGET" "$GLB_VAR_PY
 fi
 infotext "no conflicts detected"
 
-if version_lt $GLB_VAR_PY_VERSION "3.7.0"; then
+if version_lt "$GLB_VAR_PY_VERSION" "3.7.0"; then
   infotext "note: legacy versions are likely to fail during configuration/build"
   infotext "note: legacy versions will expect exec paths and environment setups that are no longer standard in linux"
   infotext "note: building is not impossible but will require manual setup before trying to build"
@@ -388,7 +388,7 @@ infotext "configuring.." "  --enable-optimizations" "  --with-ensurepip=install"
 if ! ./configure --enable-optimizations --with-ensurepip=install --prefix="$GLB_PATH_INSTALL_PREFIX" > "$GLB_PATH_BUILD_LOG" 2>&1; then
   infotext "'./configure' failed (exit code: $?)"
   if ask_confirmation "would you like to see the full build log now?"; then
-    (( GLB_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
+    (( $GLB_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
   fi
   exit 1
 fi
@@ -402,7 +402,7 @@ fi
 if ! make -j${GLB_VAR_CORES} > "$GLB_PATH_BUILD_LOG" 2>&1; then
   infotext "'make' failed (exit code: $?)"
   if ask_confirmation "would you like to see the full build log now?"; then
-    (( GLB_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
+    (( $GLB_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
   fi
   exit 1
 fi
@@ -413,7 +413,7 @@ infotext "build complete" "installing.."
 if ! make altinstall > "$GLB_PATH_BUILD_LOG" 2>&1; then
   infotext "'make altinstall' failed (exit code: $?)"
   if ask_confirmation "would you like to see the full build log now?"; then
-    (( GLB_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
+    (( $GLB_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
   fi
   exit 1
 fi
