@@ -62,7 +62,7 @@ ask_confirmation() {
     # assume yes
     return 0
   fi
-  local prompt="$1"
+  local prompt=$1
   while true; do
     read -p "[INPUT] --> $prompt (y/n): " choice
     case "$choice" in
@@ -80,7 +80,7 @@ ask_confirmation() {
 }
 
 scan_directory() {
-  local dir="$1"
+  local dir=$1
   local entry name
   for entry in "$dir"/*; do
     [[ -e $entry ]] || continue
@@ -106,8 +106,8 @@ parse_version_string() {
 }
 
 detect_version_conflicts() {
-  local dir="$1"
-  local conflict_ver="${2%.*}"
+  local dir=$1
+  local conflict_ver=${2%.*}
   local maj min pat
   while read -r maj min pat; do
     if [[ "${maj}.${min}" == $conflict_ver ]]; then
@@ -119,8 +119,8 @@ detect_version_conflicts() {
 }
 
 download_file() {
-  local url="$1"
-  local dest="$2"
+  local url=$1
+  local dest=$2
   if [[ -z $url || -z $dest ]]; then
     exit_with_error "download_file() called but not passed required argument(s)"
   fi
@@ -149,8 +149,8 @@ install_build_dependencies() {
 
 check_disk_space() {
   # all sizes are KB
-  local path="$1"
-  local req_space_kb="$2"
+  local path=$1
+  local req_space_kb=$2
   local req_space_buff=${3:-0}
   local req_space=$(( $req_space_kb + $req_space_buff ))
   local available_kb=$(df -Pk "$path" | awk 'NR==2 {print $4}')
@@ -195,9 +195,9 @@ check_build_memory() {
 
 create_swap() {
   # all sizes are KB
-  local swapsize="$1"
+  local swapsize=$1
   local swapdir=/var
-  GLB_PATH_SWAPFILE="${swapdir}/py_build_swap"
+  GLB_PATH_SWAPFILE=${swapdir}/py_build_swap
   if ! check_disk_space "$swapdir" "$swapsize" 512000; then
     exit_with_error "insufficient free space in '$swapdir' for temporary swapfile, cannot continue"
   fi
@@ -299,7 +299,7 @@ GLB_VAR_CORES=$(nproc)
 GLB_PATH_TMP_DIR=$(mktemp -d) || exit_with_error "'mktemp' failed to create temporary directory in /tmp"
 GLB_PATH_TMP_FILE=$(mktemp -u python.XXXXXX) || exit_with_error "'mktemp' failed to generate temporary filename"
 GLB_PATH_BUILD_LOG=${GLB_PATH_SCRIPT_DIR}/py_build.log
-GLB_PATH_TARBALL="${GLB_PATH_TMP_DIR}/${GLB_PATH_TMP_FILE}"
+GLB_PATH_TARBALL=${GLB_PATH_TMP_DIR}/${GLB_PATH_TMP_FILE}
 GLB_URL_PY_SRC_BASE="https://www.python.org/ftp/python/<PY_VER>/Python-<PY_VER>.tgz"
 
 trap cleanup EXIT
@@ -361,7 +361,7 @@ if version_lt $GLB_VAR_PY_VERSION "3.7.0"; then
 fi
 
 GLB_PATH_BUILD_DIR=("$GLB_PATH_TMP_DIR"/*/)
-GLB_PATH_INSTALL_PREFIX="${GLB_PATH_INSTALL_TARGET}/python-${GLB_VAR_PY_VERSION%.*}"
+GLB_PATH_INSTALL_PREFIX=${GLB_PATH_INSTALL_TARGET}/python-${GLB_VAR_PY_VERSION%.*}
 
 # ----- INSTALL BUILD TOOLS -----------
 
