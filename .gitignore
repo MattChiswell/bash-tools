@@ -1,0 +1,29 @@
+# ---- Python ---- #
+__pycache__/
+*.py[cod]
+
+# ---- Virtual Environments ---- #
+.venv/
+venv/
+env/
+ENV/
+
+# ---- Backups ---- #
+*.bak
+
+# ---- Config ---- #
+config/settings.ini
+
+# ---- Databases ---- #
+data/db/*.db
+
+# ---- Debug ---- #
+debug/
+
+# ---- Log Files ---- #
+*.log
+
+# ---- OS / Editor Junk ---- #
+.DS_Store
+.vscode
+*.swp
