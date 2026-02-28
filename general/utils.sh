@@ -1,4 +1,4 @@
-#!/usr/local/env bash
+#!/usr/bin/env bash
 
 # ----- BASH-TOOLS GLOBALS ---------------------------
 # Namespace: BSHT_
