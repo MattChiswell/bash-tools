@@ -13,6 +13,9 @@
 #   attempting to install legacy versions (<= 3.4)
 # ----------------------------------------------------
 
+# setup script path early
+GLB_PATH_SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
 # ----- HELPERS --------------------------------------
 
 usage() {
@@ -295,7 +298,7 @@ fi
 GLB_VAR_CORES=$(nproc)
 GLB_PATH_TMP_DIR=$(mktemp -d) || exit_with_error "'mktemp' failed to create temporary directory in /tmp"
 GLB_PATH_TMP_FILE=$(mktemp -u python.XXXXXX) || exit_with_error "'mktemp' failed to generate temporary filename"
-GLB_PATH_BUILD_LOG=/var/log/py_build.log
+GLB_PATH_BUILD_LOG=${GLB_PATH_SCRIPT_DIR}/py_build.log
 GLB_PATH_TARBALL="${GLB_PATH_TMP_DIR}/${GLB_PATH_TMP_FILE}"
 GLB_URL_PY_SRC_BASE="https://www.python.org/ftp/python/<PY_VER>/Python-<PY_VER>.tgz"
 
