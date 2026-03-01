@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# ----- INFO ---------------------------
+# Namespace: py_util_
+
 # ----- INCLUDES -------------------------------------
 
 # setup script path early
