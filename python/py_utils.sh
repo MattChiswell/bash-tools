@@ -21,6 +21,11 @@ py_util_scan_directory() {
   done
 }
 
+# --- FUNCTION: get_version_from_binary [binary] --- #
+py_util_get_version_from_binary() {
+  "$1" -c 'import sys; print(".".join(map(str, sys.version_info[:3])))' > /dev/null 2>&1 || return 1
+}
+
 # --- FUNCTION: version_lt [ver] [lt_ver] --- #
 py_util_version_lt() {
     [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" != "$2" ]
