@@ -58,6 +58,26 @@ py_util_detect_version_conflicts() {
   done < <(py_util_scan_directory "$dir")
 }
 
+# ----- TESTING --------------------------------------
+
+# --- FUNCTION: test_module [binary] [module] --- #
+py_util_test_module() {
+  local py=$1
+  local module=$2
+  "$py" -c "import $module" > /dev/null 2>&1 || return 1
+}
+
+# --- FUNCTION: test_venv [binary] --- #
+py_util_test_venv() {
+  local py=$1
+  local test_dir=$(mktemp -d) || return 1
+  "$py" -m venv "$test_dir" > /dev/null 2>&1 || return 1
+  source "$test_dir/bin/activate" > /dev/null 2>&1 || return 1
+  python -V > /dev/null 2>&1 || return 1
+  deactivate > /dev/null 2>&1 || return 1
+  rm -r "$test_dir"
+}
+
 # ----- BUILDING -------------------------------------
 
 # --- FUNCTION: install_build_dependencies --- #
