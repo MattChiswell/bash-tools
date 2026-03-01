@@ -91,34 +91,3 @@ py_util_install_build_dependencies() {
     libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev \
     liblzma-dev tk-dev libffi-dev xz-utils > /dev/null || return 1
 }
-
-# --- FUNCTION: build_swap [swapfile] --- #
-py_util_build_swap() {
-  local swapfile=$1
-  local total_mem=$(util_check_memory) || return 1
-  if [[ $total_mem -lt 1048576 ]]; then
-    # 3G swap
-    echo "PERF_1"
-    if ! util_create_swap 3145728 "$swapfile"; then
-      return 1
-    fi
-  elif [[ $total_mem -gt 1048576 && $total_mem -lt 2097152 ]]; then
-    # 2G swap
-    echo "PERF_1"
-    if ! util_create_swap 2097152 "$swapfile"; then
-      return 1
-    fi
-  elif [[ $total_mem -gt 2097152 && $total_mem -lt 3145728 ]]; then
-    # 1G swap
-    if ! util_create_swap 1048576 "$swapfile"; then
-      return 1
-    fi
-  elif [[ $total_mem -gt 3145728 ]]; then
-    # no extra swap needed
-    echo "PERF_2"
-    return 0
-  else
-    # failure somewhere
-    return 1
-  fi
-}
