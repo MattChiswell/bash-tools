@@ -52,12 +52,42 @@ usage() {
   exit 1
 }
 
+build_swap() {
+  local swapfile=$1
+  local total_mem=$(util_check_memory) || return 1
+  if [[ $total_mem -lt 1048576 ]]; then
+    # 3G swap
+    echo "PERF_1"
+    if ! util_create_swap 3145728 "$swapfile"; then
+      return 1
+    fi
+  elif [[ $total_mem -gt 1048576 && $total_mem -lt 2097152 ]]; then
+    # 2G swap
+    echo "PERF_1"
+    if ! util_create_swap 2097152 "$swapfile"; then
+      return 1
+    fi
+  elif [[ $total_mem -gt 2097152 && $total_mem -lt 3145728 ]]; then
+    # 1G swap
+    if ! util_create_swap 1048576 "$swapfile"; then
+      return 1
+    fi
+  elif [[ $total_mem -gt 3145728 ]]; then
+    # no extra swap needed
+    echo "PERF_2"
+    return 0
+  else
+    # failure somewhere
+    return 1
+  fi
+}
+
 cleanup() {
   echo ""
   util_infotext "cleaning up before exit.."
-  if [[ -e $GLB_PATH_TMP_DIR ]]; then
-    rm -r "$GLB_PATH_TMP_DIR"
-    util_infotext "  --> removed '$GLB_PATH_TMP_DIR'"
+  if [[ -e $PYI_PATH_TMP_DIR ]]; then
+    rm -r "$PYI_PATH_TMP_DIR"
+    util_infotext "  --> removed '$PYI_PATH_TMP_DIR'"
   fi
   if [[ -e $PYI_PATH_INSTALL_TARGET ]] && (( PYI_FLAG_DIR_CREATED )); then
     rm -r "$PYI_PATH_INSTALL_TARGET"
@@ -214,8 +244,8 @@ util_infotext "dependencies installed"
 # ----- SYSTEM MEMORY/SWAP ------------
 
 util_infotext "checking system memory setup" "a temporary swapfile may be created during this process, it will be removed automatically"
-if retval=$(py_util_build_swap "$GLB_PATH_SWAPFILE"); then
-  [[ $retval == "PERF_1" ]] && GLB_FLAG_REDUCED_PERF=1
+if retval=$(build_swap "$PYI_PATH_SWAPFILE"); then
+  [[ $retval == "PERF_1" ]] && PYI_FLAG_REDUCED_PERF=1
   [[ $retval == "PERF_2" ]] && util_infotext "no temporary swapfile needed"
 else
   util_warntext "a temporary swapfile was required due to the limited system memory available"
