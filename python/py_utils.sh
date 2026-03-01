@@ -13,6 +13,44 @@ source "${PY_UTIL_SCRIPT_DIR%/*}/general/utils.sh"
 
 # ----- DETECTION ------------------------------------
 
+# --- FUNCTION: find_python_binaries --- #
+py_util_find_python_binaries() {
+  local search_roots=(
+    /usr/bin
+    /usr/local/bin
+    /opt
+    /opt/*/bin
+    "$HOME/.local/bin"
+  )
+  find "${search_roots[@]}" \
+    -maxdepth 3 \
+    -type f \
+    -executable \
+    -name "python3*" 2>/dev/null
+}
+
+# --- FUNCTION: select_python_binary [min_ver] [max_ver] --- #
+py_util_select_python_binary() {
+  local best best_version version py
+  local min_version=$1
+  local max_version=$2
+  while IFS= read -r py; do
+    version=$(py_util_get_version_from_binary "$py") || continue
+    if [[ "$(printf '%s\n' "$min_version" "$version" | sort -V | head -n1)" != "$min_version" ]]; then
+      continue
+    fi
+    if [[ "$(printf '%s\n' "$max_version" "$version" | sort -V | tail -n1)" != "$max_version" ]]; then
+      continue
+    fi
+    if [[ -z "$best_version" ]] || [[ "$(printf '%s\n' "$best_version" "$version" | sort -V | tail -n1)" == "$version" ]]; then
+      best="$py"
+      best_version="$version"
+    fi
+  done < <(py_util_find_python_binaries)
+  [[ -z "$best" ]] && return 1
+  [[ -n "$best" ]] && echo "$best"
+}
+
 # --- FUNCTION: scan_directory [dir] --- #
 py_util_scan_directory() {
   local dir=$1
