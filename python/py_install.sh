@@ -19,9 +19,9 @@ source "${PYI_PATH_SCRIPT_DIR%/*}/general/utils.sh"
 source "${PYI_PATH_SCRIPT_DIR}/py_utils.sh"
 
 # Bash-Tools globals
-BSHT_FLAG_QUIET=0
-BSHT_FLAG_LOG_FILE_ENABLED=1
-BSHT_PATH_LOG_FILE=${GLB_PATH_SCRIPT_DIR}/install.log
+BSHT_FLAG_QUIET=${BSHT_FLAG_QUIET:-0}
+BSHT_FLAG_LOG_FILE_ENABLED=${BSHT_FLAG_LOG_FILE_ENABLED:-1}
+BSHT_PATH_LOG_FILE=${PYI_PATH_SCRIPT_DIR}/install.log
 
 # ----- HELPERS --------------------------------------
 
