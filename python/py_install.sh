@@ -133,7 +133,7 @@ while getopts d:u:v:fqh flag; do
     u) PYI_URL_PY_SRC=$OPTARG ;;
     v) PYI_VAR_PY_VERSION=$OPTARG ;;
     f) PYI_FLAG_MKDIR=1 ;;
-    q) BSHT_FLAG_QUIET=1 ;;
+    q) BSHT_FLAG_QUIET=1 && BSHT_FLAG_LOG_FILE_ENABLED=1 ;;
     h) usage ;;
     *) usage ;;
   esac
