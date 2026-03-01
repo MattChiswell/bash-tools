@@ -13,11 +13,14 @@ Most scripts will have their own help text that is accessible by passing the `-h
 Tools can be handpicked from these folders and imported into projects as-is or the entire repository can be cloned into a folder and referenced from there. In that case, the scripts in the repository may reference eachother and will only work like that if they remain within the repository. If the structure is changed or individual scripts are moved elsewhere, note that internal references/includes may need to be updated/removed.
 
 ### Tools
-- General
-  - `utils.sh` - Contains various general purpose utility functions used by several tools;
-- Python
+- general
+  - `utils.sh` - Various general purpose utility functions used by several tools;
+- os
+  - dietpi
+    - `dp_utils.sh` - Various functions specific to DietPi OS;
+- python
   - `py_install.sh` - Installs Python from source tarball; see `-h` for details on options;
-  - `py_utils.sh` - Contains various utility functions used by the Python tools;
+  - `py_utils.sh` - Various utility functions used by the Python tools;
 
 ### Requirements
 - Bash >= 4.3
@@ -25,6 +28,7 @@ Tools can be handpicked from these folders and imported into projects as-is or t
 
 ### Tested on
 - Debian 11+
+- DietPi 9+
 - Ubuntu 20.04+
 
 ### License
