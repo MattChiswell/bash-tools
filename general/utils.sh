@@ -6,11 +6,6 @@
 #   -> BSHT_PATH_LOG_FILE
 #   -> BSHT_FLAG_LOG_FILE_ENABLED
 
-# ----- TODOs ----------------------------------------
-# TODO[0][x] - Flatten logfile functions
-# TODO[1][x] - Accept array of groups to generalise function
-# TODO[2][ ] - Consider moving these to seperate file
-# TODO[3][x] - Refactor the mem check into its own function
 
 
 # ----- INPUT/OUTPUT ---------------------------------
