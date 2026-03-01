@@ -192,7 +192,7 @@ util_check_command() {
   return 1
 }
 
-# ----- SERVICE/SYSCONFIG ----------------------------
+# ----- SYSTEM ---------------------------------------
 
 # --- FUNCTION: create_system_user [user:str] [groups:array] [array(out)] --- #
 util_create_system_user() {
@@ -214,86 +214,4 @@ util_create_system_user() {
       continue
     fi
   done
-}
-
-# --- FUNCTION: set_dtparam [dtparam] [state] [file] --- #
-# TODO[2]
-util_set_dtparam() {
-  local param=$1
-  local state=$2
-  local file=$3
-  if grep -q "^[[:space:]]*dtparam=${param}=${state}" "$file"; then
-    # already set
-    #echo "'${param}' already set to '${state}'"
-    echo "STATE_1"
-    return 0
-  fi
-  if grep -q "^[[:space:]]*#\?[[:space:]]*dtparam=${param}=" "$file"; then
-    sed -i --follow-symlinks \
-      "s/^[[:space:]]*#\?[[:space:]]*dtparam=${param}=.*/dtparam=${param}=${state}/" \
-      "$file" || return 1
-      # found and updated
-      #echo "updated '${param}' to '${state}'"
-      echo "STATE_2"
-      return 0
-  else
-    echo "dtparam=${param}=${state}" >> "$file"
-    # not found, added to EOF
-    #echo "appended '${param}' with state '${state}' to end of '${file}'"
-    echo "STATE_3"
-    return 0
-  fi
-}
-
-# --- FUNCTION: register_service [name] [template] [replacements] --- #
-# TODO[2]
-util_register_service() {
-  local service_name=$1
-  local template_file=$2
-  local -n replacements=$3
-  local service_file="/etc/systemd/system/${service_name}.service"
-  [[ -e $service_file ]] && return 0
-  sed \
-    -e "s|%USER%|${replacements[0]}|g" \
-    -e "s|%GROUP%|${replacements[1]}|g" \
-    -e "s|%WORKINGDIR%|${replacements[2]}|g" \
-    -e "s|%PYTHON%|${replacements[3]}|g" \
-    -e "s|%APP%|${replacements[2]}/main.py|g" \
-    -e "s|%RC522RESET%|${replacements[2]}/src/gpio/reset_rc522.sh|g" \
-    "$template_file" > /dev/null 2>&1 || return 1
-  mv "$template_file" "$service_file"
-  systemctl daemon-reload > /dev/null 2>&1 || return 1
-  systemctl enable "$service_name" > /dev/null 2>&1 || return 1
-}
-
-# --- FUNCTION: set_app_config [file] --- #
-# TODO[2]
-util_set_app_config() {
-  local config_file=$1
-  local -n out_webui_info=$2
-  local log_levels=(DEBUG INFO WARN ERROR CRITICAL)
-  ! [[ -f $config_file ]] && return 1
-  echo "[$(date '+%d-%m-%Y %H:%M:%S')] [INPUT] Please enter desired config values, for defaults just press enter"
-  read -p "[$(date '+%d-%m-%Y %H:%M:%S')] [INPUT] Database name [ca_att.db]: " input_db_name; input_db_name=${input_db_name:-ca_att.db}
-  read -p "[$(date '+%d-%m-%Y %H:%M:%S')] [INPUT] Web server should listen on [0.0.0.0]: " input_web_host; input_web_host=${input_web_host:-0.0.0.0}
-  read -p "[$(date '+%d-%m-%Y %H:%M:%S')] [INPUT] Web server port [8081]: " input_web_port; input_web_port=${input_web_port:-8081}
-  read -p "[$(date '+%d-%m-%Y %H:%M:%S')] [INPUT] RFID Reader RST GPIO pin [25]: " input_rfid_rst; input_rfid_rst=${input_rfid_rst:-25}
-  read -p "[$(date '+%d-%m-%Y %H:%M:%S')] [INPUT] Enable logging to file? (y|n) [y]: " input_log_enabled; input_log_enabled=${input_log_enabled:-y}
-  if [[ "$input_log_enabled" == "y" ]]; then
-    read -p "[$(date '+%d-%m-%Y %H:%M:%S')] [INPUT] Logging level (DEBUG|INFO|WARN|ERROR|CRITICAL) [ERROR]: " input_log_level; input_log_level=${input_log_level:-ERROR}
-    if ! util_array_contains log_levels "$input_log_level"; then
-      echo "[$(date '+%d-%m-%Y %H:%M:%S')] [INPUT] Error: Log level must be one of DEBUG|INFO|WARN|ERROR|CRITICAL"
-      echo "[$(date '+%d-%m-%Y %H:%M:%S')] [INPUT] Setting default value of 'ERROR'"
-      input_log_level="ERROR"
-    fi
-  fi
-  sed -i --follow-symlinks "s/sqlite_db.*/sqlite_db = ${input_db_name}/" "$config_file" || return 1
-  sed -i --follow-symlinks "s/host.*/host = ${input_web_host}/" "$config_file" || return 1
-  sed -i --follow-symlinks "s/port.*/port = ${input_web_port}/" "$config_file" || return 1
-  sed -i --follow-symlinks "s/rst_pin.*/rst_pin = ${input_rfid_rst}/" "$config_file" || return 1
-  if [[ "$input_log_enabled" == "y" ]]; then
-    sed -i --follow-symlinks "s/enabled.*/enabled = True/" "$config_file" || return 1
-    sed -i --follow-symlinks "s/level.*/level = ${input_log_level}/" "$config_file" || return 1
-  fi
-  out_webui_info=("$input_web_host" "$input_web_port")
 }
