@@ -3,7 +3,7 @@
 # ----- INCLUDES -------------------------------------
 
 # setup script path early
-PY_UTIL_SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+PY_UTIL_SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd -P)
 
 # load required scripts
 source "${PY_UTIL_SCRIPT_DIR%/*}/general/utils.sh"
