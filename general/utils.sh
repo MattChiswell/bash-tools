@@ -8,7 +8,7 @@
 
 # ----- TODOs ----------------------------------------
 # TODO[0][x] - Flatten logfile functions
-# TODO[1][ ] - Accept array of groups to generalise function
+# TODO[1][x] - Accept array of groups to generalise function
 # TODO[2][ ] - Consider moving these to seperate file
 # TODO[3][x] - Refactor the mem check into its own function
 
@@ -194,22 +194,24 @@ util_check_command() {
 
 # ----- SERVICE/SYSCONFIG ----------------------------
 
-# --- FUNCTION: create_service_user [user] --- #
-# TODO[1][2]
-util_create_service_user() {
+# --- FUNCTION: create_system_user [user:str] [groups:array] [array(out)] --- #
+util_create_system_user() {
   local user=$1
-  local grps=(gpio i2c spi)
+  [[ -n $2 ]] && local -n groups=$2
+  [[ -n $3 ]] && local -n not_found=$3
   if ! id "$user" > /dev/null 2>&1; then
     useradd --system --no-create-home --shell /usr/sbin/nologin "$user" || return 1
   fi
-  for grp in "${grps[@]}"; do
+  [[ -z $groups ]] && return 0
+  for grp in "${groups[@]}"; do
     if getent group "$grp" > /dev/null 2>&1; then
       if id "$user" | grep -q "$grp"; then
         continue
       fi
       usermod -aG "$grp" "$user" > /dev/null 2>&1 || return 1
     else
-      return 1
+      not_found+=("$grp")
+      continue
     fi
   done
 }
