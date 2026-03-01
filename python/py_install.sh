@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ----- NOTES ----------------------------------------
-# + variables prefixed with GLB_ are considered global
+# + variables prefixed with PYI_ are considered global
 # + external mutation of globals should be avoided
 # + very early versions will fail to configure/build
 #   due to changes in expected build environment, you
@@ -12,11 +12,11 @@
 # ----- INCLUDES -------------------------------------
 
 # setup script path early
-GLB_PATH_SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+PYI_PATH_SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
 # load required scripts
-source "${GLB_PATH_SCRIPT_DIR%/*}/general/utils.sh"
-source "${GLB_PATH_SCRIPT_DIR}/py_utils.sh"
+source "${PYI_PATH_SCRIPT_DIR%/*}/general/utils.sh"
+source "${PYI_PATH_SCRIPT_DIR}/py_utils.sh"
 
 # Bash-Tools globals
 BSHT_FLAG_QUIET=0
@@ -59,50 +59,50 @@ cleanup() {
     rm -r "$GLB_PATH_TMP_DIR"
     util_infotext "  --> removed '$GLB_PATH_TMP_DIR'"
   fi
-  if [[ -e $GLB_PATH_INSTALL_TARGET ]] && (( GLB_FLAG_DIR_CREATED )); then
-    rm -r "$GLB_PATH_INSTALL_TARGET"
-    util_infotext "  --> removed '$GLB_PATH_INSTALL_TARGET'"
+  if [[ -e $PYI_PATH_INSTALL_TARGET ]] && (( PYI_FLAG_DIR_CREATED )); then
+    rm -r "$PYI_PATH_INSTALL_TARGET"
+    util_infotext "  --> removed '$PYI_PATH_INSTALL_TARGET'"
   fi
-  if [[ -e $GLB_PATH_SWAPFILE ]]; then
-    swapoff "$GLB_PATH_SWAPFILE" > /dev/null 2>&1
-    rm -f "$GLB_PATH_SWAPFILE"
-    util_infotext "  --> disabled temporary swapfile and removed '$GLB_PATH_SWAPFILE'"
+  if [[ -e $PYI_PATH_SWAPFILE ]]; then
+    swapoff "$PYI_PATH_SWAPFILE" > /dev/null 2>&1
+    rm -f "$PYI_PATH_SWAPFILE"
+    util_infotext "  --> disabled temporary swapfile and removed '$PYI_PATH_SWAPFILE'"
   fi
 }
 
 # ----- GLOBALS --------------------------------------
 
 # Flags
-GLB_FLAG_MKDIR=0
-GLB_FLAG_DIR_CREATED=0
-GLB_FLAG_REDUCED_PERF=0
+PYI_FLAG_MKDIR=0
+PYI_FLAG_DIR_CREATED=0
+PYI_FLAG_REDUCED_PERF=0
 
 # Vars
-GLB_VAR_CORES=0
-GLB_VAR_PY_VERSION=""
+PYI_VAR_CORES=0
+PYI_VAR_PY_VERSION=""
 
 # URLs
-GLB_URL_PY_SRC=""
-GLB_URL_PY_SRC_BASE=""
+PYI_URL_PY_SRC=""
+PYI_URL_PY_SRC_BASE=""
 
 # Paths
-GLB_PATH_TARBALL=""
-GLB_PATH_TMP_DIR=""
-GLB_PATH_TMP_FILE=""
-GLB_PATH_SWAPFILE=""
-GLB_PATH_BUILD_DIR=""
-GLB_PATH_BUILD_LOG=""
-GLB_PATH_INSTALL_TARGET=""
-GLB_PATH_INSTALL_PREFIX=""
+PYI_PATH_TARBALL=""
+PYI_PATH_TMP_DIR=""
+PYI_PATH_TMP_FILE=""
+PYI_PATH_SWAPFILE=""
+PYI_PATH_BUILD_DIR=""
+PYI_PATH_BUILD_LOG=""
+PYI_PATH_INSTALL_TARGET=""
+PYI_PATH_INSTALL_PREFIX=""
 
 # ----- ARGUMENTS ------------------------------------
 
 while getopts d:u:v:fqh flag; do
   case "$flag" in
-    d) GLB_PATH_INSTALL_TARGET=$OPTARG ;;
-    u) GLB_URL_PY_SRC=$OPTARG ;;
-    v) GLB_VAR_PY_VERSION=$OPTARG ;;
-    f) GLB_FLAG_MKDIR=1 ;;
+    d) PYI_PATH_INSTALL_TARGET=$OPTARG ;;
+    u) PYI_URL_PY_SRC=$OPTARG ;;
+    v) PYI_VAR_PY_VERSION=$OPTARG ;;
+    f) PYI_FLAG_MKDIR=1 ;;
     q) BSHT_FLAG_QUIET=1 ;;
     h) usage ;;
     *) usage ;;
@@ -116,31 +116,31 @@ if [[ $EUID -ne 0 ]]; then
   exec sudo "$0" "$@"
 fi
 
-if [[ -z $GLB_PATH_INSTALL_TARGET ]]; then
+if [[ -z $PYI_PATH_INSTALL_TARGET ]]; then
   util_exit_with_error "missing argument: -d [PATH]"
 fi
 
-if [[ -z $GLB_URL_PY_SRC && -z $GLB_VAR_PY_VERSION ]]; then
+if [[ -z $PYI_URL_PY_SRC && -z $PYI_VAR_PY_VERSION ]]; then
   util_exit_with_error "missing argument: specify one of -u [URL] or -v [VERSION]"
 fi
 
-if [[ -n $GLB_URL_PY_SRC && -n $GLB_VAR_PY_VERSION ]]; then
+if [[ -n $PYI_URL_PY_SRC && -n $PYI_VAR_PY_VERSION ]]; then
   util_exit_with_error "too many arguments: specify one of -u [URL] OR -v [VERSION], not both"
 fi
 
-if ! [[ -d $GLB_PATH_INSTALL_TARGET ]] && ! (( GLB_FLAG_MKDIR )); then
-  util_exit_with_error "directory '$GLB_PATH_INSTALL_TARGET' does not exist, -f not set so will not create"
+if ! [[ -d $PYI_PATH_INSTALL_TARGET ]] && ! (( PYI_FLAG_MKDIR )); then
+  util_exit_with_error "directory '$PYI_PATH_INSTALL_TARGET' does not exist, -f not set so will not create"
 fi
 
 # ----- SETUP ----------------------------------------
 
-GLB_VAR_CORES=$(nproc)
-GLB_PATH_SWAPFILE=/var/py_build_swap
-GLB_PATH_TMP_DIR=$(mktemp -d) || util_exit_with_error "'mktemp' failed to create temporary directory in /tmp"
-GLB_PATH_TMP_FILE=$(mktemp -u python.XXXXXX) || util_exit_with_error "'mktemp' failed to generate temporary filename"
-GLB_PATH_BUILD_LOG=${GLB_PATH_SCRIPT_DIR}/py_build.log
-GLB_PATH_TARBALL=${GLB_PATH_TMP_DIR}/${GLB_PATH_TMP_FILE}
-GLB_URL_PY_SRC_BASE="https://www.python.org/ftp/python/<PY_VER>/Python-<PY_VER>.tgz"
+PYI_VAR_CORES=$(nproc)
+PYI_PATH_SWAPFILE=/var/py_build_swap
+PYI_PATH_TMP_DIR=$(mktemp -d) || util_exit_with_error "'mktemp' failed to create temporary directory in /tmp"
+PYI_PATH_TMP_FILE=$(mktemp -u python.XXXXXX) || util_exit_with_error "'mktemp' failed to generate temporary filename"
+PYI_PATH_BUILD_LOG=${PYI_PATH_SCRIPT_DIR}/py_build.log
+PYI_PATH_TARBALL=${PYI_PATH_TMP_DIR}/${PYI_PATH_TMP_FILE}
+PYI_URL_PY_SRC_BASE="https://www.python.org/ftp/python/<PY_VER>/Python-<PY_VER>.tgz"
 
 trap cleanup EXIT
 
@@ -148,49 +148,49 @@ trap cleanup EXIT
 
 # ----- INSTALL DIRECTORY -------------
 
-if ! [[ -d $GLB_PATH_INSTALL_TARGET ]] && (( GLB_FLAG_MKDIR )); then
-  util_infotext "$GLB_PATH_INSTALL_TARGET does not exist, it will be created"
-  mkdir -p "$GLB_PATH_INSTALL_TARGET"
-  GLB_FLAG_DIR_CREATED=1
+if ! [[ -d $PYI_PATH_INSTALL_TARGET ]] && (( PYI_FLAG_MKDIR )); then
+  util_infotext "$PYI_PATH_INSTALL_TARGET does not exist, it will be created"
+  mkdir -p "$PYI_PATH_INSTALL_TARGET"
+  PYI_FLAG_DIR_CREATED=1
 fi
 
 # ----- DOWNLOAD/EXTRACT --------------
 
-if [[ -z $GLB_URL_PY_SRC && -n $GLB_VAR_PY_VERSION ]]; then
-  GLB_URL_PY_SRC=$(sed "s/<PY_VER>/${GLB_VAR_PY_VERSION}/g" <<< $GLB_URL_PY_SRC_BASE)
+if [[ -z $PYI_URL_PY_SRC && -n $PYI_VAR_PY_VERSION ]]; then
+  PYI_URL_PY_SRC=$(sed "s/<PY_VER>/${PYI_VAR_PY_VERSION}/g" <<< $PYI_URL_PY_SRC_BASE)
 fi
 
 util_infotext "this script will attempt to install Python from source"
-util_infotext "download url: $GLB_URL_PY_SRC"
-util_infotext "install path: $GLB_PATH_INSTALL_TARGET"
+util_infotext "download url: $PYI_URL_PY_SRC"
+util_infotext "install path: $PYI_PATH_INSTALL_TARGET"
 util_infotext "downloading archive, please wait.."
 
-if ! util_download_file "$GLB_URL_PY_SRC" "$GLB_PATH_TARBALL"; then
+if ! util_download_file "$PYI_URL_PY_SRC" "$PYI_PATH_TARBALL"; then
   util_exit_with_error "download failed, please check the URL and try again"
 fi
 
 util_infotext "download complete" "extracting tarball.."
-tar -xzf "$GLB_PATH_TARBALL" -C "$GLB_PATH_TMP_DIR"
-util_infotext "extraction complete" "checking for conflicting versions in '$GLB_PATH_INSTALL_TARGET'.."
+tar -xzf "$PYI_PATH_TARBALL" -C "$PYI_PATH_TMP_DIR"
+util_infotext "extraction complete" "checking for conflicting versions in '$PYI_PATH_INSTALL_TARGET'.."
 
 # ----- VERSION CONFLICTS -------------
 
-if [[ -z $GLB_VAR_PY_VERSION ]]; then
-  version_str=("$GLB_PATH_TMP_DIR"/*/)
+if [[ -z $PYI_VAR_PY_VERSION ]]; then
+  version_str=("$PYI_PATH_TMP_DIR"/*/)
   version_str=${version_str[0]%/}
   version_str=${version_str##*/}
-  if ! GLB_VAR_PY_VERSION=$(py_util_parse_version_string "$version_str" | sed 's/ /./g'); then
+  if ! PYI_VAR_PY_VERSION=$(py_util_parse_version_string "$version_str" | sed 's/ /./g'); then
     util_exit_with_error "unable to determine version number from downloaded Python tarball"
   fi
 fi
 
-if ! existing=$(py_util_detect_version_conflicts "$GLB_PATH_INSTALL_TARGET" "$GLB_VAR_PY_VERSION"); then
+if ! existing=$(py_util_detect_version_conflicts "$PYI_PATH_INSTALL_TARGET" "$PYI_VAR_PY_VERSION"); then
   echo "$existing"
   util_exit_with_error "unable to continue, change install path or remove existing version"
 fi
 util_infotext "no conflicts detected"
 
-if py_util_version_lt "$GLB_VAR_PY_VERSION" "3.7.0"; then
+if py_util_version_lt "$PYI_VAR_PY_VERSION" "3.7.0"; then
   util_infotext "note: legacy versions are likely to fail during configuration/build"
   util_infotext "note: legacy versions will expect exec paths and environment setups that are no longer standard in linux"
   util_infotext "note: building is not impossible but will require manual setup before trying to build"
@@ -200,8 +200,8 @@ if py_util_version_lt "$GLB_VAR_PY_VERSION" "3.7.0"; then
   fi
 fi
 
-GLB_PATH_BUILD_DIR=("$GLB_PATH_TMP_DIR"/*/)
-GLB_PATH_INSTALL_PREFIX=${GLB_PATH_INSTALL_TARGET}/python-${GLB_VAR_PY_VERSION%.*}
+PYI_PATH_BUILD_DIR=("$PYI_PATH_TMP_DIR"/*/)
+PYI_PATH_INSTALL_PREFIX=${PYI_PATH_INSTALL_TARGET}/python-${PYI_VAR_PY_VERSION%.*}
 
 # ----- INSTALL BUILD TOOLS -----------
 
@@ -224,27 +224,27 @@ fi
 
 # ----- CONFIGURE/BUILD ---------------
 
-util_infotext "moving into build directory.." "  --> $GLB_PATH_BUILD_DIR"
-cd "$GLB_PATH_BUILD_DIR"
+util_infotext "moving into build directory.." "  --> $PYI_PATH_BUILD_DIR"
+cd "$PYI_PATH_BUILD_DIR"
 
-util_infotext "configuring.." "  --enable-optimizations" "  --with-ensurepip=install" "  --prefix=$GLB_PATH_INSTALL_PREFIX"
-if ! ./configure --enable-optimizations --with-ensurepip=install --prefix="$GLB_PATH_INSTALL_PREFIX" > "$GLB_PATH_BUILD_LOG" 2>&1; then
+util_infotext "configuring.." "  --enable-optimizations" "  --with-ensurepip=install" "  --prefix=$PYI_PATH_INSTALL_PREFIX"
+if ! ./configure --enable-optimizations --with-ensurepip=install --prefix="$PYI_PATH_INSTALL_PREFIX" > "$PYI_PATH_BUILD_LOG" 2>&1; then
   util_infotext "'./configure' failed (exit code: $?)"
   if util_ask_confirm "would you like to see the full build log now?"; then
-    (( BSHT_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
+    (( BSHT_FLAG_QUIET )) || cat "$PYI_PATH_BUILD_LOG"
   fi
   exit 1
 fi
 
 util_infotext "configure complete" "note that building may take +1hr on limited hardware"
-util_infotext "all build output is redirected into '$GLB_PATH_BUILD_LOG'" "building.."
+util_infotext "all build output is redirected into '$PYI_PATH_BUILD_LOG'" "building.."
 
-(( GLB_FLAG_REDUCED_PERF )) && GLB_VAR_CORES=2
+(( PYI_FLAG_REDUCED_PERF )) && PYI_VAR_CORES=2
 
-if ! make -j${GLB_VAR_CORES} > "$GLB_PATH_BUILD_LOG" 2>&1; then
+if ! make -j${PYI_VAR_CORES} > "$PYI_PATH_BUILD_LOG" 2>&1; then
   util_infotext "'make' failed (exit code: $?)"
   if util_ask_confirm "would you like to see the full build log now?"; then
-    (( BSHT_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
+    (( BSHT_FLAG_QUIET )) || cat "$PYI_PATH_BUILD_LOG"
   fi
   exit 1
 fi
@@ -252,20 +252,20 @@ fi
 # ----- INSTALL -----------------------
 
 util_infotext "build complete" "installing.."
-if ! make altinstall > "$GLB_PATH_BUILD_LOG" 2>&1; then
+if ! make altinstall > "$PYI_PATH_BUILD_LOG" 2>&1; then
   util_infotext "'make altinstall' failed (exit code: $?)"
   if util_ask_confirm "would you like to see the full build log now?"; then
-    (( BSHT_FLAG_QUIET )) || cat "$GLB_PATH_BUILD_LOG"
+    (( BSHT_FLAG_QUIET )) || cat "$PYI_PATH_BUILD_LOG"
   fi
   exit 1
 fi
 
 # dont do this?
-#ln -s "${GLB_PATH_INSTALL_PREFIX}" "${GLB_PATH_INSTALL_PREFIX}/bin/python3"
+#ln -s "${PYI_PATH_INSTALL_PREFIX}" "${PYI_PATH_INSTALL_PREFIX}/bin/python3"
 
 # ----- EXIT --------------------------
 
 util_infotext "install complete"
-util_infotext "  --> installed to: $GLB_PATH_INSTALL_PREFIX" " --> binary: ${GLB_PATH_INSTALL_PREFIX}/bin/python${GLB_VAR_PY_VERSION%.*}"
+util_infotext "  --> installed to: $PYI_PATH_INSTALL_PREFIX" " --> binary: ${PYI_PATH_INSTALL_PREFIX}/bin/python${PYI_VAR_PY_VERSION%.*}"
 util_infotext "this version has NOT been added to your path"
 exit 0
