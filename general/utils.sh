@@ -7,6 +7,10 @@
 #   -> BSHT_FLAG_LOG_FILE_ENABLED
 
 
+# ----- GLOBALS --------------------------------------
+
+BSHT_FLAG_QUIET=${BSHT_FLAG_QUIET:-0}
+BSHT_FLAG_LOG_FILE_ENABLED=${BSHT_FLAG_LOG_FILE_ENABLED:-0}
 
 # ----- INPUT/OUTPUT ---------------------------------
 
