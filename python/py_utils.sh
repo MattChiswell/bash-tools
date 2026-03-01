@@ -20,7 +20,7 @@ py_util_find_python_binaries() {
     /usr/local/bin
     /opt
     /opt/*/bin
-    "$HOME/.local/bin"
+    #"$HOME/.local/bin"
   )
   find "${search_roots[@]}" \
     -maxdepth 3 \
