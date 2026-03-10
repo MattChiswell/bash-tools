@@ -15,10 +15,10 @@ They have been organised as a library of related tools and should, for the most 
 
 ### Globals
 There are several global variables that are used by various parts of the library, these can be set inside your project or at the command line. They all have default values which are set in `bashtools.lib.sh`. Globals that can be modified are:
-- BSHT_PATH_LOG_FILE
-- BSHT_FLAG_QUIET
-- BSHT_FLAG_DEBUG
-- BSHT_FLAG_LOG_FILE_ENABLED
+- `BSHT_PATH_LOG_FILE`
+- `BSHT_FLAG_QUIET`
+- `BSHT_FLAG_DEBUG`
+- `BSHT_FLAG_LOG_FILE_ENABLED`
 
 ### Tools
 - `lib/core/error.sh` - error handling and capture
