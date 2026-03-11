@@ -39,7 +39,7 @@ function general::ask_confirm() {
     case "${response,,}" in
       y*) return 0 ;;
       n*) return 1 ;;
-      *) log::warn "invalid response (y/n)" ;;
+      *) log::warn "invalid response (y/n)"; return 2 ;;
     esac
   done
 }
