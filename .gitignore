@@ -27,3 +27,6 @@ debug/
 .DS_Store
 .vscode
 *.swp
+
+# ---- Tests ---- #
+tests/
