@@ -43,7 +43,7 @@ function python::select_binary() {
     fi
   done < <(python::find_binaries)
   [[ -z "$best" ]] && return 1
-  [[ -n "$best" ]] && echo "$best"
+  [[ -n "$best" ]] && printf "$best"
 }
 
 # --- FUNCTION: python::detect_conflicts [dir:str] [ver:str] --- #
