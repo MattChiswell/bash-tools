@@ -24,7 +24,17 @@ There are several global variables that are used by various parts of the library
 - `lib/core/error.sh` - error handling and capture
 - `lib/core/logging.sh` - terminal and file based logging
 - `lib/general/utils.sh` - general purpose utility functions (memory, disk space, arrays etc)
-- `lib/python/py_utils.sh` - functions related to python management/interaction (building, venv, module testing etc)
+- `lib/python/utils.sh` - functions related to python management/interaction (building, venv, module testing etc)
+
+### Usage
+To make use of the library functions, the simplest method is to clone the repository and source the entry script into your project, for example:
+```bash
+source "/full/path/to/bashtools.lib.sh"
+```
+If you wish to make use of the included binaries/scripts, if you would prefer not to type the full file path everytime you wish to call one, you can add the `bin` folder to your path, for example:
+```bash
+export PATH=$PATH:/full/path/to/bin
+```
 
 ### Requirements
 - Bash >= 4.3
