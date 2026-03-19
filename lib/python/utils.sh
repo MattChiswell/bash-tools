@@ -72,7 +72,7 @@ function python::detect_conflicts() {
 # --- FUNCTION: python::get_version_from_binary [binary:str] --- #
 function python::version_from_binary() {
   error::require_args 1 "$@"
-  "$1" -c 'import sys; print(".".join(map(str, sys.version_info[:3])))' > /dev/null 2>&1 || return 1
+  "$1" -c 'import sys; print(".".join(map(str, sys.version_info[:3])))' 2> /dev/null || return 1
 }
 
 # --- FUNCTION: python::version_lt [ver:str] [lt_ver:str] --- #
