@@ -112,11 +112,11 @@ function python::test_venv() {
   error::require_args 1 "$@"
   local py=$1
   local test_dir=$(mktemp -d) || return 1
-  trap "general::cleanup_dirs $test_dir" "${BSHT_VAR_TRAP_SIGNALS[@]}"
   "$py" -m venv "$test_dir" > /dev/null 2>&1 || return 1
   source "$test_dir/bin/activate" > /dev/null 2>&1 || return 1
   python -V > /dev/null 2>&1 || return 1
   deactivate > /dev/null 2>&1 || return 1
+  rm -r "$test_dir"
 }
 
 # ----- BUILDING -------------------------------------
