@@ -61,7 +61,10 @@ function python::detect_conflicts() {
     bin_path="$(general::abspath $entry)/bin/python${version%.*}"
     bin_ver=$(python::version_from_binary "$bin_path")
     maj=${bin_ver%%.*}; tmp=${bin_ver#*.}; min=${tmp%%.*}; pat=${bin_ver##*.}
-    [[ $conflict_ver =~ ^(${maj})\.(${min})(\.${pat})?$ ]] && return 1
+    if [[ $conflict_ver =~ ^(${maj})\.(${min})(\.${pat})?$ ]]; then
+      printf "%s.%s.%s" "$maj" "$min" "${pat:-x}"
+      return 1
+    fi
   done
   return 0
 }
