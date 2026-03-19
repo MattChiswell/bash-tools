@@ -35,7 +35,17 @@ function general::cleanup_dirs() {
 function general::ask_confirm() {
   (( BSHT_FLAG_QUIET )) && return 0
   local prompt=$1
-  while read -p "[INPUT] $prompt (y/n) " response; do
+  local ts=$(date '+%d-%m-%Y %H:%M:%S')
+  local str=$(
+    printf '[%b%s%b] [%bINPUT%b] %s (y/n) ' \
+      "$LOG_COLOUR_BLACK" \
+      "$ts" \
+      "$LOG_COLOUR_RESET" \
+      "$LOG_COLOUR_CYAN" \
+      "$LOG_COLOUR_RESET" \
+      "$prompt"
+  )
+  while read -p "$str" response; do
     case "${response,,}" in
       y*) return 0 ;;
       n*) return 1 ;;
