@@ -11,7 +11,7 @@ function log::setup_term_colours() {
     LOG_COLOUR_DEBUG="\033[1;34m" # blue bold
     LOG_COLOUR_ERROR="\033[1;31m" # red bold
     LOG_COLOUR_GREEN="\033[1;32m" # green bold
-    LOG_COLOUR_CYAN="\033[1;36m" # cyan bold
+    LOG_COLOUR_CYAN="\033[1;36m"  # cyan bold
     LOG_COLOUR_BLACK="\033[0;90m" # black high-intensity [looks like light gray]
     LOG_COLOUR_RESET="\033[0m"
   else
