@@ -43,6 +43,7 @@ source "${BSHT_PATH_ROOT_DIR}/lib/core/logging.sh"
 source "${BSHT_PATH_ROOT_DIR}/lib/core/error.sh"
 source "${BSHT_PATH_ROOT_DIR}/lib/general/utils.sh"
 source "${BSHT_PATH_ROOT_DIR}/lib/python/utils.sh"
+source "${BSHT_PATH_ROOT_DIR}/lib/os/dietpi/utils.sh"
 
 # ----- SETUP ----------------------------------------
 
