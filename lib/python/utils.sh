@@ -6,9 +6,9 @@
 
 # --- FUNCTION: python::find_binaries --- #
 function python::find_binaries() {
-  general::assert test -d /opt
-  general::assert test -d /usr/bin
-  general::assert test -d /usr/local/bin
+  error::assert test -d /opt
+  error::assert test -d /usr/bin
+  error::assert test -d /usr/local/bin
   local search_roots=(
     /opt
     /usr/bin
