@@ -19,7 +19,7 @@ function python::find_binaries() {
     -type f \
     -executable \
     -regextype posix-extended \
-    -regex ".*/python3\.[0-9]+$" > /dev/null 2>&1
+    -regex ".*/python3\.[0-9]+$" 2> /dev/null
 }
 
 # --- FUNCTION: python::select_binary [min_ver:str] [max_ver:str] --- #
