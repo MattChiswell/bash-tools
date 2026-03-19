@@ -51,8 +51,7 @@ function python::detect_conflicts() {
   error::require_args 2 "$@"
   local dir=$1
   local conflict_ver=$2
-  local bin_path bin_ver entry folder_ver maj min pat tmp
-  local i=0
+  local bin_path bin_ver entry maj min pat tmp
   [[ -d $dir ]] || {
     error::die "python::detect_conflicts() -> '$dir' does not exist"
   }
