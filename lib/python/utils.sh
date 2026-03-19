@@ -9,11 +9,7 @@ function python::find_binaries() {
   error::assert test -d /opt
   error::assert test -d /usr/bin
   error::assert test -d /usr/local/bin
-  local search_roots=(
-    /opt
-    /usr/bin
-    /usr/local/bin
-  )
+  local search_roots=(/opt /usr/bin /usr/local/bin)
   find "${search_roots[@]}" \
     -maxdepth 3 \
     -type f \
