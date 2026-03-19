@@ -45,7 +45,7 @@ function general::ask_confirm() {
       "$LOG_COLOUR_RESET" \
       "$prompt"
   )
-  while read -p "$str" response; do
+  while read -p "$str" response < /dev/tty; do
     case "${response,,}" in
       y*) return 0 ;;
       n*) return 1 ;;
