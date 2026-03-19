@@ -65,16 +65,21 @@ function general::infoheader() {
   (( pad_total < 0 )) && pad_total=0
   local left=$(( pad_total / 2 ))
   local right=$(( pad_total - left ))
-  printf '\n%s %s %s\n\n' \
+  printf '\n%b%s %s %s%b\n\n' \
+    "$LOG_COLOUR_GREEN" \
     "$(printf "%*s" "$left" | tr ' ' "$pad")" \
     "$text" \
-    "$(printf "%*s" "$right" | tr ' ' "$pad")"
+    "$(printf "%*s" "$right" | tr ' ' "$pad")" \
+    "$LOG_COLOUR_RESET"
 }
 
 # --- FUNCTION: infodivider --- #
 function general::infodivider() {
   (( BSHT_FLAG_QUIET )) && return 0
-  printf "\n--------------------------------------------------------------------\n\n"
+  printf \
+    "\n%b--------------------------------------------------------------------%b\n\n" \
+    "$LOG_COLOUR_GREEN" \
+    "$LOG_COLOUR_RESET"
 }
 
 # ----- VALIDATION -----------------------------------
