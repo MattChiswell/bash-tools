@@ -21,6 +21,8 @@ function error::try() {
   if (( BSHT_FLAG_DEBUG )) && [[ -n $out ]]; then
     log::debug "stderr from: $*"
     printf '%s\n' "$out" | sed 's/^/  /' >&2
+  else
+    log::error "enable debug output to see more info"
   fi
   return "$status"
 }
