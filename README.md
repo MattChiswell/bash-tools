@@ -28,6 +28,7 @@ There are several global variables that are used by various parts of the library
 - `lib/core/logging.sh` - terminal and file based logging
 - `lib/general/utils.sh` - general purpose utility functions (memory, disk space, arrays etc)
 - `lib/python/utils.sh` - functions related to python management/interaction (building, venv, module testing etc)
+- `lib/os/dietpi/utils.sh` - functions targetting DietPi OS specifically
 
 ### Usage
 To make use of the library functions, the simplest method is to clone the repository and source the entry script into your project, for example:
