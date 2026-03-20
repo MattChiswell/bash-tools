@@ -20,6 +20,9 @@ There are several global variables that are used by various parts of the library
 - `BSHT_FLAG_DEBUG`
 - `BSHT_FLAG_LOG_FILE_ENABLED`
 
+### Binaries
+- `bin/py_install.sh` - installs Python from source; accepts URL to tarball or just a version number for automatic download; extensive help dialog accessible with `-h`
+
 ### Tools
 - `lib/core/error.sh` - error handling and capture
 - `lib/core/logging.sh` - terminal and file based logging
