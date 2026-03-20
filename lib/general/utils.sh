@@ -54,6 +54,19 @@ function general::ask_confirm() {
   done
 }
 
+# --- FUNCTION: format_prompt [prompt:str] --- #
+function general::format_prompt() {
+  local prompt=$1
+  local ts=$(date '+%d-%m-%Y %H:%M:%S')
+  printf '[%b%s%b] [%bINPUT%b] %s: ' \
+    "$LOG_COLOUR_BLACK" \
+    "$ts" \
+    "$LOG_COLOUR_RESET" \
+    "$LOG_COLOUR_CYAN" \
+    "$LOG_COLOUR_RESET" \
+    "$prompt"
+}
+
 # --- FUNCTION: infoheader [title:str] --- #
 function general::infoheader() {
   (( BSHT_FLAG_QUIET )) && return 0
