@@ -186,7 +186,7 @@ function general::create_swap() {
   # all sizes are KB
   local swapsize=$1
   local swapfile=$2
-  if ! general::check_disk_space "${swapfile%/*}" "$swapsize" 512000; then
+  if ! general::check_disk_space "${swapfile%/*}" "$swapsize" 102400; then
     # consider throwing warning here and maybe letting the caller reduce size by 25% and try again?
     error::die "insufficient free space in '${swapfile%/*}' for temporary swapfile, cannot continue"
   fi
