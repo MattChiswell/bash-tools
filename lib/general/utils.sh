@@ -170,9 +170,12 @@ function general::check_disk_space() {
 # --- FUNCTION: general::check_memory --- #
 function general::check_memory() {
   # all sizes are KB
+  local include_swap=${1:-0}
   local total_ram=$(cat /proc/meminfo | grep 'MemTotal' | grep -o '[0-9]\+') || return 1
   local total_swp=$(cat /proc/meminfo | grep 'SwapTotal' | grep -o '[0-9]\+') || return 1
-  local total_mem=$(( $total_ram + $total_swp ))
+  local total_mem
+  (( include_swap )) && total_mem=$(( $total_ram + $total_swp ))
+  (( ! include_swap )) && total_mem=$(( $total_ram ))
   printf "$total_mem"
   return 0
 }
