@@ -196,6 +196,15 @@ function general::create_swap() {
   swapon "$swapfile" > /dev/null 2>&1 || return 1
 }
 
+# --- FUNCTION: general::remove_swap [swapfile:str] --- #
+function general::remove_swap() {
+  error::require_args 1 "$@"
+  local swapfile=$1
+  [[ -e $swapfile ]] || return 0
+  swapoff "$swapfile" > /dev/null 2>&1 || return 1
+  rm "$swapfile" > /dev/null 2>&1 || return 1
+}
+
 # ----- SYSTEM ---------------------------------------
 
 # --- FUNCTION: general::create_system_user [user:str] [groups:array] [array(out)] --- #
