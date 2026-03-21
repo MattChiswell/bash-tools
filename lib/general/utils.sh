@@ -144,13 +144,9 @@ function general::download_file() {
   local url=$1
   local dest=$2
   if command -v curl > /dev/null 2>&1; then
-    if ! curl -fsL "$url" -o "$dest"; then
-      return 1
-    fi
+    curl -fsL "$url" -o "$dest" || return 1
   elif command -v wget > /dev/null 2>&1; then
-    if ! wget -q -O "$dest" "$url"; then
-      return 1
-    fi
+    wget -q -O "$dest" "$url" || return 1
   else
     error::die "neither 'curl' nor 'wget' could be found, please install one of these and try again"
   fi
