@@ -167,7 +167,7 @@ function general::check_disk_space() {
   return 0
 }
 
-# --- FUNCTION: general::check_memory --- #
+# --- FUNCTION: general::check_memory [include_swap:int] --- #
 function general::check_memory() {
   # all sizes are KB
   local include_swap=${1:-0}
