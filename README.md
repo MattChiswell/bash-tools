@@ -51,3 +51,6 @@ export PATH=$PATH:/full/path/to/bin
 
 ### License
 This repository is released under GNU General Public License v3.0. The license can be found, in its entirety, within LICENSE at the root of the repository.
+
+### Source
+https://github.com/MattChiswell/bash-tools
