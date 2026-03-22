@@ -38,10 +38,14 @@ function error::assert() {
 }
 
 # --- FUNCTION: error::require [cmd:str].. --- #
+# should we die here instead? less clutter in the caller?
 function error::require() {
   local cmd
   for cmd in "$@"; do
-    command -v "$cmd" > /dev/null 2>&1 || error::die "required command not found: $cmd"
+    command -v "$cmd" > /dev/null 2>&1 || {
+      log::error "required command not found: $cmd"
+      return 1
+    }
   done
 }
 
