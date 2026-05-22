@@ -123,11 +123,14 @@ function general::array_contains() {
 function general::abspath() {
   error::require_args 1 "$@"
   if command -v realpath > /dev/null 2>&1; then
-    realpath "$1"
+    realpath "$1" 2> /dev/null || return 1
+    return 0
   elif command -v readlink > /dev/null 2>&1; then
-    readlink -f "$1"
+    readlink -f "$1" 2> /dev/null || return 1
+    return 0
   else
     printf '%s\n' "$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")"
+    return 0
   fi
 }
 
