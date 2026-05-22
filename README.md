@@ -18,6 +18,8 @@ There are several global variables that are used by various parts of the library
 - `BSHT_PATH_LOG_FILE`
 - `BSHT_FLAG_QUIET`
 - `BSHT_FLAG_DEBUG`
+- `BSHT_FLAG_NO_ROOT`
+- `BSHT_FLAG_LOG_SIMPLE`
 - `BSHT_FLAG_LOG_FILE_ENABLED`
 
 ### Binaries
