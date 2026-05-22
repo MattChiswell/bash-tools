@@ -30,7 +30,8 @@ function log::setup_term_colours() {
 
 # --- FUNCTION: _log [level:str] [msg:str].. --- #
 function _log() {
-  local level=$1; shift
+  local level=$1
+  shift
   local ts
   local level_colour_var="LOG_COLOUR_$level"
   local level_colour=${!level_colour_var}
@@ -38,24 +39,39 @@ function _log() {
     for msg in "${@:1}"; do
       ts=$(date '+%d-%m-%Y %H:%M:%S')
       [[ $level != "ERROR" && $level != "DEBUG" ]] && msg=" $msg"
-      printf '[%s] [%s] %s\n' \
-        "$ts" \
-        "$level" \
-        "$msg" >> "$BSHT_PATH_LOG_FILE"
+      if (( BSHT_FLAG_LOG_SIMPLE )); then
+        printf '[%s] %s\n'
+          "$level" \
+          "$msg" >> "$BSHT_PATH_LOG_FILE"
+      else
+        printf '[%s] [%s] %s\n' \
+          "$ts" \
+          "$level" \
+          "$msg" >> "$BSHT_PATH_LOG_FILE"
+      fi
     done
   fi
+  (( ! BSHT_FLAG_DEBUG )) && [[ $level == "DEBUG" ]] && return
   if (( ! BSHT_FLAG_QUIET )) || [[ $level == "ERROR" ]]; then
     for msg in "${@:1}"; do
       ts=$(date '+%d-%m-%Y %H:%M:%S')
       [[ $level != "ERROR" && $level != "DEBUG" ]] && msg=" $msg"
-      printf '[%b%s%b] [%b%s%b] %s\n' \
-        "$LOG_COLOUR_BLACK" \
-        "$ts" \
-        "$LOG_COLOUR_RESET" \
-        "$level_colour" \
-        "$level" \
-        "$LOG_COLOUR_RESET" \
-        "$msg"
+      if (( BSHT_FLAG_LOG_SIMPLE )); then
+        printf '[%b%s%b] %s\n' \
+          "$level_colour" \
+          "$level" \
+          "$LOG_COLOUR_RESET" \
+          "$msg"
+      else
+        printf '[%b%s%b] [%b%s%b] %s\n' \
+          "$LOG_COLOUR_BLACK" \
+          "$ts" \
+          "$LOG_COLOUR_RESET" \
+          "$level_colour" \
+          "$level" \
+          "$LOG_COLOUR_RESET" \
+          "$msg"
+      fi
     done
   fi
 }

@@ -7,6 +7,7 @@
 # --- FUNCTION: general::require_root --- #
 function general::require_root() {
   (( EUID == 0 )) && return
+  (( BSHT_FLAG_NO_ROOT )) && return
   (( BSHT_FLAG_QUIET )) || {
     log::warn "must be run as root, retrying with sudo"
     log::warn "enter sudo password if prompted"
@@ -36,15 +37,23 @@ function general::ask_confirm() {
   (( BSHT_FLAG_QUIET )) && return 0
   local prompt=$1
   local ts=$(date '+%d-%m-%Y %H:%M:%S')
-  local str=$(
-    printf '[%b%s%b] [%bINPUT%b] %s (y/n) ' \
+  local str
+  if (( BSHT_FLAG_LOG_SIMPLE )); then
+    str=$(printf '[%bINPUT%b] %s (y/n) ' \
+      "$LOG_COLOUR_CYAN" \
+      "$LOG_COLOUR_RESET" \
+      "$prompt"
+    )
+  else
+    str=$(printf '[%b%s%b] [%bINPUT%b] %s (y/n) ' \
       "$LOG_COLOUR_BLACK" \
       "$ts" \
       "$LOG_COLOUR_RESET" \
       "$LOG_COLOUR_CYAN" \
       "$LOG_COLOUR_RESET" \
       "$prompt"
-  )
+    )
+  fi
   while read -p "$str" response; do
     case "${response,,}" in
       y*) return 0 ;;
