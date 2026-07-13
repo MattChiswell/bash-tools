@@ -8,7 +8,7 @@
 function general::require_root() {
   (( EUID == 0 )) && return
   (( BSHT_FLAG_NO_ROOT )) && return
-  (( BSHT_FLAG_QUIET )) || {
+  (( BSHT_FLAG_QUIET || BSHT_FLAG_SUPPRESS_ROOT_WARN )) || {
     log::warn "must be run as root, retrying with sudo"
     log::warn "enter sudo password if prompted"
   }
