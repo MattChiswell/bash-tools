@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.2] - 13-07-2026
+### Added
+- Addition of `BSHT_FLAG_SUPPRESS_ROOT_WARN` to remove warning in output when using `general::require_root` with logging/output enabled.
+
 ## [1.0.1] - 25-05-2026
 ### Added
 - Addition of `BSHT_FLAG_LOG_SIMPLE` to help better control script output.
